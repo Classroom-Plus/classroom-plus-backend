@@ -1,16 +1,17 @@
-//'use strict';
+'use strict';
 
-//const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
-const PAGE_ACCESS_TOKEN = 'EAAH7yKeipFkBAJQMADJ2M7rrwSyXIcFTG3HioVYvSOUlVTxzuDXv1iu9iafkFCi1u7KnuPsS8erg7UeTdY83TMptZBaebkeF22I2xT59CdkW0kWA0WSNMTxDUNrtvAnSX7FU7cycZCJLWSZAqvuzqA2GZBlwba2RjrZBHZAcl9WwZDZD'
-// Imports dependencies and set up http server
-const
-    request = require('request'),
-    express = require('express'),
-    body_parser = require('body-parser'),
-    app = express().use(body_parser.json()); // creates express http server
+const express = require('express')
+const request = require('request')
+const env = require('dotenv').config()
+const body_parser = require('body-parser')
+const app = express()
+
+const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
+
+app.use(body_parser.json())
 
 // Sets server port and logs message on success
-app.listen(process.env.PORT || 1337, () => console.log('webhook is listening'));
+app.listen(process.env.PORT || 3000, () => console.log('server start! webhook is listening'));
 
 // Accepts POST requests at /webhook endpoint
 app.post('/webhook', (req, res) => {

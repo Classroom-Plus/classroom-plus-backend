@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/leon1757tw/Bulletin_Notice_Bot/issues"
   },
-  "homepage": "https://github.com/leon1757tw/Bulletin_Notice_Bot#readme"
+  "homepage": "https://github.com/leon1757tw/Bulletin_Notice_Bot#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2"
+  }
 }

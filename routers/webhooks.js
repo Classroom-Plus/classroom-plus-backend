@@ -5,6 +5,7 @@ const env = require('dotenv').config();
 router.get('/', (req, res) => {
     if (req.query['hub.mode'] === 'subscribe' &&
         req.query['hub.verify_token'] === process.env.VERIFY_TOKEN) {
+        console.log(req.query['hub.challenge']);
         res.status(200).send(req.query['hub.challenge']);
     } else {
         res.sendStatus(403);

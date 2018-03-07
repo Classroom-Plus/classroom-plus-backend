@@ -15,12 +15,11 @@ router.get('/', (req, res) => {
 router.post('/', (req, res) => {
     const data = req.body;
 
-    console.log(data);
-
     if (data.object === 'page') {
         data.entry.forEach((entry) => {
             entry.messaging.forEach((event) => {
                 if (event.message) {
+                    console.log(event.message);
                     handleMessage(event.sender.id, event.message);
                 } else if (event.postback) {
                     // add message handler here                    

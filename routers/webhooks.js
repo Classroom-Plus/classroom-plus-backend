@@ -15,6 +15,8 @@ router.get('/', (req, res) => {
 router.post('/', (req, res) => {
     const data = req.body;
 
+    console.log(data);
+
     if (data.object === 'page') {
         data.entry.forEach((entry) => {
             entry.messaging.forEach((event) => {

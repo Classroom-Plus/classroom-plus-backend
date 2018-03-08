@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const request = require('request');
 const env = require('dotenv').config();
+const receiveApi = require('../messenger-api-helpers/receive');
 
 router.get('/', (req, res) => {
     if (req.query['hub.mode'] === 'subscribe' &&
@@ -19,7 +20,8 @@ router.post('/', (req, res) => {
         data.entry.forEach((entry) => {
             entry.messaging.forEach((event) => {
                 if (event.message) {
-                    handleMessage(event.sender.id, event.message);
+                    // add message handler here                                        
+                    receiveApi.handleReceiveMessage(event);
                 } else if (event.postback) {
                     // add message handler here                    
                 } else {
@@ -33,6 +35,7 @@ router.post('/', (req, res) => {
     }
 });
 
+<<<<<<< HEAD
 
 function handleMessage(sender_psid, received_message) {
     let response;
@@ -103,4 +106,6 @@ function callSendAPI(sender_psid, response) {
     });
 }
 
+=======
+>>>>>>> 2e6064d4a4a3f23ff6eba023a9861ba2951db8b0
 module.exports = router;

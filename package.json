@@ -18,10 +18,13 @@
   },
   "homepage": "https://github.com/leon1757tw/Bulletin_Notice_Bot#readme",
   "dependencies": {
+    "bcrypt": "^1.0.3",
     "body-parser": "^1.18.2",
-    "dotenv": "^5.0.0",
+    "dotenv": "^5.0.1",
     "express": "^4.16.2",
+    "jsonwebtoken": "^8.2.0",
     "lodash": "^4.17.5",
+    "mongoose": "^5.0.9",
     "request": "^2.83.0"
   }
 }

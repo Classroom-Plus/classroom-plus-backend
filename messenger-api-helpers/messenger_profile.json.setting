@@ -1,0 +1,43 @@
+{
+    
+    "requestURL": "https://graph.facebook.com/v2.6/me/messenger_profile?access_token=<PAGE_ACCESS_TOKEN>",
+
+
+    "greeting": [
+        {
+            "locale": "default",
+            "text": "Hello!"
+        },
+        {
+            "locale": "en_US",
+            "text": "Timeless apparel for the masses."
+        }
+    ],
+
+    
+    "persistent_menu": [
+        {
+            "locale": "default",
+            "composer_input_disabled": true,
+            "call_to_actions": [
+                {
+                    "title": "公告",
+                    "type": "nested",
+                    "call_to_actions": [
+                        {
+                            "title": "Pay Bill",
+                            "type": "postback",
+                            "payload": "PAYBILL_PAYLOAD"
+                        },
+                        {
+                            "type": "web_url",
+                            "title": "Latest News",
+                            "url": "https://www.messenger.com/",
+                            "webview_height_ratio": "full"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

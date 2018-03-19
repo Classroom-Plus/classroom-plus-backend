@@ -19,8 +19,10 @@ router.post('/', (req, res) => {
     if (data.object === 'page') {
         data.entry.forEach((entry) => {
             entry.messaging.forEach((event) => {
-                if (event.message) {                              
+                if (event.message) {
                     receiveApi.handleReceiveMessage(event);
+                } else if (event.account_linking) {
+                    receiveApi.handleReceiveAccountLink(event);
                 } else if (event.postback) {
                     // add message handler here                    
                 } else {

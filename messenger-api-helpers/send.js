@@ -1,13 +1,44 @@
+const castArray = require('lodash/castArray');
+const isEmpty = require('lodash/isEmpty');
+
 const api = require('./api');
 const message = require('./messages');
-const castArray = require('lodash/castArray');
+
+const typingOn = (recipientId) => {
+	return {
+		recipient: {
+			id: recipientId,
+		},
+		sender_action: 'typing_on',
+	};
+};
+
+const typingOff = (recipientId) => {
+	return {
+		recipient: {
+			id: recipientId,
+		},
+		sender_action: 'typing_off',
+	};
+};
+
+const sendReadReceipt = (recipientId) => {
+	const messageData = {
+		recipient: {
+			id: recipientId,
+		},
+		sender_action: 'mark_seen',
+	};
+
+	api.callMessagesAPI(messageData);
+};
 
 // Wraps a message JSON object with recipient information.
 const messageToJSON = (recipientId, messagePayload) => {
 	return {
 		recipient: {
 			id: recipientId,
-		},  
+		},
 		message: messagePayload,
 	};
 };
@@ -18,8 +49,17 @@ const sendMessage = (recipientId, messagePayloads) => {
 		.map((messagePayload) => messageToJSON(recipientId, messagePayload));
 
 	api.callMessagesAPI([
-		...messagePayloadArray
+		typingOn(recipientId),
+		...messagePayloadArray,
+		typingOff(recipientId),
 	]);
+};
+
+const sendSignOutSuccessMessage = (recipientId) =>
+	sendMessage(recipientId, message.signOutSuccessMessage);
+
+const sendSignInSuccessMessage = (recipientId, username) => {
+	sendMessage(recipientId, message.signInSuccessMessage);
 };
 
 const sendTestMessage = (recipientId, messagePayload) => {
@@ -31,11 +71,13 @@ const sendTestMessage = (recipientId, messagePayload) => {
 			text: `You sent the message: "${messagePayload}"`,
 		},
 	};
-
 	api.callMessagesAPI(messageData);
 };
 
 module.exports = {
 	sendMessage,
+	sendReadReceipt,
+	sendSignOutSuccessMessage,
+	sendSignInSuccessMessage,
 	sendTestMessage,
 };

@@ -17,7 +17,7 @@ const handleReceiveAccountLink = (event) => {
 
     switch (status) {
         case 'linked':
-            sendApi.sendSignInSuccessMessage(senderId, linkedUser.username);
+            sendApi.sendSignInSuccessMessage(senderId);
             break;
         case 'unlinked':
             sendApi.sendSignOutSuccessMessage(senderId);

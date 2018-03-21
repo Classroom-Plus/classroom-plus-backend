@@ -78,7 +78,7 @@ const test = async () => {
     //}
 }
 
-test();
+//test();
 /*
 User.sync({ force: true })
     .then(() => {

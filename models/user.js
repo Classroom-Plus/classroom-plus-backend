@@ -1,31 +1,48 @@
-const mongoose = require('mongoose');
-const {component} = require('../utils/database');
+module.exports = (sequelize, DataTypes) => {
+    let User = sequelize.define('User', {
+        id: {
+            type: DataTypes.INTEGER.UNSIGNED.ZEROFILL,
+            autoIncrement: true,
+            primaryKey: true
+        },
+        username: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            unique: true
+        },
+        password: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        privilege: {
+            type: DataTypes.INTEGER.UNSIGNED,
+            allowNull: false
+        },
+        last_logged_in: {
+            type: DataTypes.DATE,
+            defaultValue: null
+        }
+    }, {
+            paranoid: true,
+            underscored: true,
+            freezeTableName: true,
+            tableName: 'User',
+        });
 
-const user = new mongoose.Schema({
-    username: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    password: {
-        type: String,
-        required: true
-    },
-    email: {
-        type: String
-    },
-    age: {
-        type: Number
-    },
-    /*
-    *
-    */
-    messenger_id: {
-        type: String,
-        unique: true
+    User.associate = (models) => {
+        models.User.hasOne(models.UserInfo, {
+            foreignKey: 'user_id'
+        });
+        models.User.hasOne(models.UserSchedule, {
+            foreignKey: 'user_id'
+        });
+        models.User.hasOne(models.CourseMember, {
+            foreignKey: 'course_member_id'
+        });
+        models.User.hasOne(models.Topic, {
+            foreignKey: 'created_user_id'
+        });
     }
-});
 
-user.plugin(component);
-
-module.exports = mongoose.model('User', user);
+    return User;
+};

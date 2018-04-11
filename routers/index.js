@@ -3,7 +3,7 @@ const router = require('express').Router();
 const webhooks = require('./webhooks');
 const auth = require('./auth');
 
-router.use('/webhooks', webhooks);
+router.use('/webhook', webhooks);
 router.use(auth);
 
 router.get('/', (req, res) => {

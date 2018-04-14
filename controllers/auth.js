@@ -1,24 +1,29 @@
 const db = require('../models/');
-const jwt = require('../utils/jwt');
-
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const env = require('dotenv').config();
+const key = process.env.JWT_ENCRYPT_KEY;
 
 const login = async (req, res) => {
-    let user;
+    let user, token;
 
     try {
-        if (user = await db.User.findOne({ where: { username: req.body.username } })) {
+        user = await db.User.findOne({ where: { username: req.body.username } });
+        if (user !== null) {
             if (await bcrypt.compare(req.body.password, user.password)) {
                 await db.User.update(
                     { last_logged_in: new Date() },
-                    { where: { username: req.body.username } });
+                    { where: { username: req.body.username } }
+                );
+                token = await signToken(user);
                 res.json({
-                    status: 'success',
-                    token: await jwt.signToken({ username: user.username })
+                    status: true,
+                    username: user.username,
+                    token: token
                 });
             } else {
                 res.json({
-                    status: 'failed',
+                    status: false,
                     errors: {
                         msg: 'password is not correct'
                     }
@@ -26,7 +31,7 @@ const login = async (req, res) => {
             }
         } else {
             res.json({
-                status: 'failed',
+                status: false,
                 errors: {
                     msg: 'username is not exist'
                 }
@@ -43,7 +48,7 @@ const register = async (req, res) => {
             let user = {
                 username: req.body.username,
                 password: await bcrypt.hash(req.body.password, 10),
-                privilege: 5,
+                group_id: 2,
             };
 
             if (await db.User.create(user)) {
@@ -52,7 +57,7 @@ const register = async (req, res) => {
                 });
             } else {
                 res.json({
-                    status: 'failed',
+                    status: false,
                     errors: {
                         msg: 'user create failed, please try again'
                     }
@@ -60,7 +65,7 @@ const register = async (req, res) => {
             }
         } else {
             res.json({
-                status: 'failed',
+                status: false,
                 errors: {
                     msg: 'user has already existed'
                 }
@@ -69,6 +74,18 @@ const register = async (req, res) => {
     } catch (error) {
         console.log(error);
     }
+};
+
+const signToken = (user) => {
+    return new Promise((resolve, reject) => {
+        let payload = {
+            id: user.id,
+            permission: user.group_id
+        };
+        jwt.sign(payload, key, (err, token) => {
+            !err ? resolve(token) : reject(err);
+        });
+    });
 };
 
 module.exports = {

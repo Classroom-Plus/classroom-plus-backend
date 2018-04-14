@@ -5,6 +5,10 @@ module.exports = (sequelize, DataTypes) => {
             autoIncrement: true,
             primaryKey: true
         },
+        group_id: {
+            type: DataTypes.INTEGER.UNSIGNED.ZEROFILL,
+            allowNull: false
+        },
         username: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -13,10 +17,6 @@ module.exports = (sequelize, DataTypes) => {
         password: {
             type: DataTypes.STRING,
             allowNull: false,
-        },
-        privilege: {
-            type: DataTypes.INTEGER.UNSIGNED,
-            allowNull: false
         },
         last_logged_in: {
             type: DataTypes.DATE,
@@ -41,6 +41,9 @@ module.exports = (sequelize, DataTypes) => {
         });
         models.User.hasOne(models.Topic, {
             foreignKey: 'created_user_id'
+        });
+        models.User.belongsTo(models.Group, {
+            foreignKey: 'group_id'
         });
     }
 

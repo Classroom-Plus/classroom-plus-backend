@@ -25,13 +25,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         topic_message: {
             type: DataTypes.JSON,
-            allowNull: false,
-            get() {
-                return JSON.parse(this.getDataValue('topic_message'));
-            },
-            set(value) {
-                this.setDataValue('topic_message', JSON.stringify(value));
-            }
+            allowNull: false
         }
     }, {
             paranoid: true,

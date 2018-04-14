@@ -19,13 +19,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         },
         event_info: {
-            type: DataTypes.JSON,
-            get() {
-                return JSON.parse(this.getDataValue('event_info'));
-            },
-            set(value) {
-                this.setDataValue('event_info', JSON.stringify(value));
-            }
+            type: DataTypes.JSON
         }       
     }, {
             paranoid: true,

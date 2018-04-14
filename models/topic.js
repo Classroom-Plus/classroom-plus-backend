@@ -21,13 +21,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         topic_content: {
             type: DataTypes.JSON,
-            allowNull: false,
-            get() {
-                return JSON.parse(this.getDataValue('topic_content'));
-            },
-            set(value) {
-                this.setDataValue('topic_content', JSON.stringify(value));
-            }
+            allowNull: false
         }
     }, {
             paranoid: true,
@@ -37,6 +31,9 @@ module.exports = (sequelize, DataTypes) => {
         });
 
     Topic.associate = (models) => {
+        models.Topic.hasOne(models.TopicMessage, {
+            foreignKey: 'topic_id'
+        })
         models.Topic.belongsTo(models.Course, {
             foreignKey: 'course_id'
         });

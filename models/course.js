@@ -7,12 +7,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         course_info: {
             type: DataTypes.JSON,
-            get() {
-                return JSON.parse(this.getDataValue('course_info'));
-            },
-            set(value) {
-                this.setDataValue('course_info', JSON.stringify(value));
-            }
+            allowNull: false
         }
     }, {
             paranoid: true,

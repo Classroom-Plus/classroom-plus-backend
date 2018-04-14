@@ -6,7 +6,7 @@ router.post('/login', authController.login);
 
 router.post('/register', authController.register);
 
-router.post('/reset/password', authenticate.verifyToken, authController.resetPassword);
+router.post('/reset_password', authenticate.verifyToken, authController.resetPassword);
 
 router
     .route('/group/:groupId')

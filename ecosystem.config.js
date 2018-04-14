@@ -27,7 +27,7 @@ module.exports = {
       user: 'leon1757tw',
       host: '35.229.133.151',
       ref: 'origin/master',
-      repo: 'git@github.com:leon1757tw/classroom-plus-backend.git',
+      repo: 'git@github.com:Classroom-Plus/classroom-plus-backend.git',
       path: '/home/leon1757tw/www/production',
       'post-deploy': 'npm install && pm2 reload ecosystem.config.js --env production'
     },

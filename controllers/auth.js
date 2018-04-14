@@ -5,24 +5,26 @@ const env = require('dotenv').config();
 const key = process.env.JWT_ENCRYPT_KEY;
 
 const login = async (req, res) => {
+    let username = req.body.username;
+    let password = req.body.password;
     let user, token;
 
     try {
-        user = await db.User.findOne({ where: { username: req.body.username } });
-        if (user !== null) {
-            if (await bcrypt.compare(req.body.password, user.password)) {
+        user = await db.User.findOne({ where: { username: username } });
+        if (user) {
+            if (await bcrypt.compare(password, user.password)) {
                 await db.User.update(
                     { last_logged_in: new Date() },
-                    { where: { username: req.body.username } }
+                    { where: { username: username } }
                 );
                 token = await signToken(user);
-                res.json({
+                return res.json({
                     status: true,
                     username: user.username,
                     token: token
                 });
             } else {
-                res.json({
+                return res.json({
                     status: false,
                     errors: {
                         msg: 'password is not correct'
@@ -30,7 +32,7 @@ const login = async (req, res) => {
                 });
             }
         } else {
-            res.json({
+            return res.json({
                 status: false,
                 errors: {
                     msg: 'username is not exist'
@@ -39,32 +41,37 @@ const login = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
+        res.sendStatus(400);
     }
 };
 
 const register = async (req, res) => {
+    let username = req.body.username;
+    let password = req.body.password;
+    // let identity = req.body.identity;
+
     try {
-        if (!await db.User.findOne({ where: { username: req.body.username } })) {
+        if (!await db.User.findOne({ where: { username: username } })) {
             let user = {
-                username: req.body.username,
-                password: await bcrypt.hash(req.body.password, 10),
-                group_id: 2,
+                username: username,
+                password: await bcrypt.hash(password, 10),
+                group_id: 2,                                    //determine group_id by identity
             };
 
             if (await db.User.create(user)) {
-                res.json({
-                    status: 'success'
+                return res.json({
+                    status: true
                 });
             } else {
-                res.json({
+                return res.json({
                     status: false,
                     errors: {
-                        msg: 'user create failed, please try again'
+                        msg: 'user creates failed, please try again'
                     }
                 });
             }
         } else {
-            res.json({
+            return res.json({
                 status: false,
                 errors: {
                     msg: 'user has already existed'
@@ -73,8 +80,40 @@ const register = async (req, res) => {
         }
     } catch (error) {
         console.log(error);
+        res.sendStatus(400);
     }
 };
+
+const resetPassword = async (req, res) => {
+    let userId = req.authData.id;
+    let newPassword = req.body.password;
+
+    try {
+        if (userId) {
+            if (newPassword) {
+                await db.User.update(
+                    { password: await bcrypt.hash(newPassword, 10) },
+                    { where: { id: userId } }
+                );
+                return res.json({
+                    status: true,
+                });
+            } else {
+                return res.json({
+                    status: false,
+                    errors: {
+                        msg: 'required new password'
+                    }
+                });
+            }
+        } else {
+            return res.sendStatus(401);
+        }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(400);
+    }
+}
 
 const signToken = (user) => {
     return new Promise((resolve, reject) => {
@@ -82,7 +121,7 @@ const signToken = (user) => {
             id: user.id,
             permission: user.group_id
         };
-        jwt.sign(payload, key, (err, token) => {
+        jwt.sign(payload, key, { expiresIn: '1h' }, (err, token) => {
             !err ? resolve(token) : reject(err);
         });
     });
@@ -90,5 +129,6 @@ const signToken = (user) => {
 
 module.exports = {
     login,
-    register
+    register,
+    resetPassword
 };

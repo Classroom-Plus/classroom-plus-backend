@@ -1,5 +1,5 @@
 {
-  "name": "bulletin_notice_bot",
+  "name": "classroom-plus-backend",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,25 +9,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/leon1757tw/Bulletin_Notice_Bot.git"
+    "url": "git+https://github.com/Classroom-Plus/classroom-plus-backend.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/leon1757tw/Bulletin_Notice_Bot/issues"
+    "url": "https://github.com/Classroom-Plus/classroom-plus-backend.git/issues"
   },
-  "homepage": "https://github.com/leon1757tw/Bulletin_Notice_Bot#readme",
+  "homepage": "https://github.com/Classroom-Plus/classroom-plus-backend.git#readme",
   "dependencies": {
     "bcrypt": "^1.0.3",
     "body-parser": "^1.18.2",
     "dotenv": "^5.0.1",
-    "express": "^4.16.2",
-    "jade": "^1.11.0",
+    "express": "^4.16.3",
     "jsonwebtoken": "^8.2.0",
     "lodash": "^4.17.5",
-    "mongoose": "^5.0.9",
     "mysql2": "^1.5.3",
-    "pg": "^7.4.1",
     "request": "^2.83.0",
     "sequelize": "^4.37.3",
     "uuid": "^3.2.1"

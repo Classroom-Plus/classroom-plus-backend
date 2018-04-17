@@ -9,6 +9,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false,
             unique: true
+        },
+        group_level: {
+            type: DataTypes.INTEGER.UNSIGNED,
+            allowNull: false
         }
     }, {
             paranoid: true,

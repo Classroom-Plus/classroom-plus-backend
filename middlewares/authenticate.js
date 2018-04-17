@@ -21,6 +21,30 @@ const verifyToken = (req, res, next) => {
     }
 };
 
+const verifyCourseMember = async (req, res, next) => {
+    let userId = req.authData.id;
+    let courseId = req.params.courseId;
+    let isCourseMember;
+
+    if (userId && courseId) {
+        isCourseMember = await db.CourseMember.findOne({
+            where: {
+                course_id: courseId,
+                course_member_id: userId
+            },
+            raw: true
+        });
+        if (isCourseMember) {
+            next();
+        } else {
+            return res.sendStatus(403);
+        }
+    } else {
+        return res.sendStatus(403);
+    }
+}; 
+
 module.exports = {
     verifyToken,
-}
+    verifyCourseMember
+};

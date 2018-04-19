@@ -5,7 +5,15 @@ module.exports = (sequelize, DataTypes) => {
             autoIncrement: true,
             primaryKey: true
         },
-        course_info: {
+        course_name: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        course_type: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        course_other_info: {
             type: DataTypes.JSON,
             allowNull: false
         }

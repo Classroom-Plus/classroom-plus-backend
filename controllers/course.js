@@ -13,6 +13,8 @@ const getCourseList = async (req, res) => {
 };
 
 const createCourse = async (req, res) => {
+    let {courseName, courseInfo, courseBanner}
+
     try {
         await db.Course.create({
             course_info: req.body

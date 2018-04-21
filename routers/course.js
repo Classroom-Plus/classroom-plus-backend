@@ -55,5 +55,4 @@ router
     .route('/topic/:topicId/message/:messageId/:referId')   //message reply refer to another message
     .post();
 
-
 module.exports = router;

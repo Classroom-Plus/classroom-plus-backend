@@ -5,17 +5,19 @@ module.exports = (sequelize, DataTypes) => {
             autoIncrement: true,
             primaryKey: true
         },
-        course_name: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
         course_type: {
             type: DataTypes.STRING,
             allowNull: false
         },
-        course_other_info: {
-            type: DataTypes.JSON,
+        course_name: {
+            type: DataTypes.STRING,
             allowNull: false
+        },
+        course_banner: {
+            type: DataTypes.STRING,
+        },
+        course_info: {
+            type: DataTypes.JSON,
         }
     }, {
             paranoid: true,

@@ -9,6 +9,17 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER.UNSIGNED.ZEROFILL,
             allowNull: false,
             unique: true
+        },
+        material_directory: {
+            type: DataTypes.STRING,
+            defaultValue: '/'
+        },
+        material_filename: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        material_convert: {
+            type: DataTypes.STRING,
         }
     }, {
             paranoid: true,

@@ -19,6 +19,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false,
         },
+        topic_title: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
         topic_content: {
             type: DataTypes.JSON,
             allowNull: false

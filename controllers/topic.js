@@ -18,8 +18,8 @@ const addTopic = async (req, res) => {
                 topic_type: topic_type,
                 topic_title: topic_title,
                 topic_content: topic_content
-            }).spread((topic, iscreate) => {
-                if (iscreate)
+            }).spread((course, isCreate) => {
+                if (isCreate)
                     return res.json({
                         status: true,
                     });
@@ -100,6 +100,7 @@ const alterTopic = async (req, res) => {
         res.send(400);
     }
 }
+
 const getTopic = async (req, res) => {
     let { course_id } = req.params;
     if (!course_id)
@@ -108,12 +109,13 @@ const getTopic = async (req, res) => {
             errors: { msg: 'incorrect parameters' }
         });
     try {
-        await db.Topic.findAll({where:{course_id:course_id}}).then(topics=>res.json(topics));
+        await db.Topic.findAll({ where: { course_id: course_id } }).then(topics => res.json(topics));
     } catch (error) {
         console.log(error);
         res.send(400);
     }
 }
+
 module.exports = {
     addTopic,
     deleteTopic,

@@ -13,7 +13,6 @@ module.exports = (sequelize, DataTypes) => {
         course_member_id: {
             type: DataTypes.INTEGER.UNSIGNED.ZEROFILL,
             allowNull: false,
-            unique: true
         },
         course_member_identity: {
            type: DataTypes.INTEGER.UNSIGNED,

@@ -1,10 +1,14 @@
 const router = require('express').Router();
+const authenticate = require('../middlewares/authenticate');
+const courseController = require('../controllers/course');
+const { uploadImage } = require('../utils/uploader');
+
 
 /* ----------  Route for course user  ---------- */
 router
     .route('/')
     .get()
-    .post();
+    .post(authenticate.verifyToken, uploadImage.any(), courseController.createCourse);
 
 router
     .route('/:courseId')

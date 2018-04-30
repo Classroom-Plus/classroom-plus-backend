@@ -28,6 +28,8 @@
     "mysql2": "^1.5.3",
     "request": "^2.83.0",
     "sequelize": "^4.37.3",
-    "uuid": "^3.2.1"
+    "uuid": "^3.2.1",
+    "office-to-pdf": "^4.0.0",
+    "pdf2json": "^1.1.7"
   }
 }

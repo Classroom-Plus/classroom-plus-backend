@@ -3,14 +3,14 @@ const router = require('express').Router(),
     authenticate = require('../middlewares/authenticate');
 
 router
-    .route('/:course_id/:created_user_id')
-    .post(controller.addTopic)
-router 
-    .route('/:course_id')
-    .get(controller.getTopic)
+    .route('/course/:courseId/user/:userId')
+    .post(controller.addTopic);
 router
-    .route('/:course_id/:topic_id/:created_user_id')
-    .delete(controller.deleteTopic)
+    .route('/course/:courseId/user/:userId/topic/:topic_id')
     .put(controller.alterTopic)
+    .delete(controller.deleteTopic);
+router
+    .route('/course/:courseId')
+    .get(controller.getTopic);
 
 module.exports = router;

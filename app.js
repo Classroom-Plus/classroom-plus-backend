@@ -1,9 +1,13 @@
 const express = require('express');
 const app = express();
 
+const cors = require('cors');
 const path = require('path');
 const body_parser = require('body-parser');
 const router = require('./routers');
+
+/* ----------  CORS(Cross-Origin Resource Sharing)  ---------- */
+app.use(cors());
 
 /* ----------  Static Files  ---------- */
 app.use(express.static('public'));

@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const env = require('dotenv').config();
 const db = require('../models');
 const { uploadImage } = require('../utils/uploader');
 
@@ -7,22 +8,79 @@ const getCourseList = async (req, res) => {
     let courseList;
     try {
         courseList = await db.Course.findAll({ raw: true });
-        courseList.map((element) => {
-            element.course_banner = `localhost:8080${element.course_banner}`;
-        });
-        courseList.forEach((element) => {
-            console.log(element.course_banner);
+        if (courseList) {
+            courseList.map((entry) => {
+                entry.course_banner = `${process.env.SERVER_IP}:${process.env.PORT}${entry.course_banner}`;
+                delete entry.created_at;
+                delete entry.updated_at;
+                delete entry.deleted_at;
+            });
+            console.log(courseList);
+            return res.json({
+                status: true,
+                data: courseList
+            });
+        }
+        return res.json({
+            status: false,
+            errors: { msg: 'error' }
         });
     } catch (error) {
-        console.log(error);
+        return res.json({
+            status: false,
+            errors: { msg: 'error' }
+        });
     }
 };
 
+// getCourseList();
+
 const getUserCourseList = async (req, res) => {
-    let userId = req.authData.id;
+    let userId = 1 || req.authData.id;
     let courseList;
 
+    try {
+        courseList = await db.Course.findAll(
+            {
+                attributes:[
+                    'id',
+                    'course_type',
+                    'course_name',
+                    'course_banner',
+                    'course_info'
+                ],
+                include: [{
+                    model: db.CourseMember,
+                    as: 'CourseMember',
+                    attributes: [],
+                    where: {course_member_id: userId}
+                }],
+                raw: true
+            });
+        if(courseList.length > 0){
+            console.log({
+                status: true,
+                data: courseList
+            });
+            // return res.json({
+            //     status: true,
+            //     data: courseList
+            // })
+        }
+        // return res.json({
+        //     status: false,
+        //     errors: { msg: 'error' }
+        // });
+    } catch (error) {
+        console.log(error);
+        // return res.json({
+        //     status: false,
+        //     errors: { msg: 'error' }
+        // });
+    }
 }
+
+getUserCourseList();
 
 const createCourse = async (req, res) => {
     let { courseType, courseName, courseInfo } = req.body;
@@ -70,5 +128,6 @@ const deleteCourse = () => {
 
 
 module.exports = {
-    createCourse,
+    getCourseList,
+    createCourse
 }

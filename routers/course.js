@@ -7,7 +7,7 @@ const { uploadImage } = require('../utils/uploader');
 /* ----------  Route for course user  ---------- */
 router
     .route('/')
-    .get()
+    .get(courseController.getCourseList)
     .post(authenticate.verifyToken, uploadImage.any(), courseController.createCourse);
 
 router

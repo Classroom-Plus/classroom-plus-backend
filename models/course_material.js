@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
         course_id: {
             type: DataTypes.INTEGER.UNSIGNED.ZEROFILL,
             allowNull: false,
-            unique: true
+            unique: false
         },
         material_directory: {
             type: DataTypes.STRING,

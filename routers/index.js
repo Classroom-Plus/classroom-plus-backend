@@ -5,6 +5,7 @@ const user = require('./user');
 const course = require('./course');
 const schedule = require('./schedule');
 const topic = require('./topic');
+const material=require('./material');
 
 /* ----------  Route for fb-messenger  ---------- */
 router.use('/webhook', webhooks);
@@ -15,4 +16,5 @@ router.use('/api/user', user);
 router.use('/api/course', course);
 router.use('/api/schedule', schedule);
 router.use('/api/topic', topic);
+router.use('/api/material',material);
 module.exports = router;

@@ -1,50 +1,52 @@
 const path = require('path');
 const fs = require('fs');
-const converter = async (fileinfo) => {
-    if (fileinfo.ext === '.pdf') {
-        fileinfo.pdf = fileinfo.dest;
-        await convertTXT(fileinfo);
-    }
-    else if (fileinfo.ext === '.ppt' || fileinfo.ext === '.pptx' || fileinfo.ext === '.doc' || fileinfo.ext === '.docs' || fileinfo.ext === '.xls') {
-        await convertPDF(fileinfo).then(fileinfo => convertTXT(fileinfo)).then(fileinfo => { asyncDelete(fileinfo); }).catch(error => console.log(error));
-    }
-    return fileinfo;
-}
-function convertTXT(fileinfo) {
-    return new Promise((resolve, reject) => {
-        const PDFParser = require('pdf2json'),
-            fs = require('fs'),
-            pdfparser = new PDFParser(this, 1);
-        pdfparser.on("pdfParser_dataError", errData => {throw errData;});
-        pdfparser.on("pdfParser_dataReady", pdfData => {
-            fileinfo.txt = path.join(fileinfo.dirname, '/txt/', fileinfo.basename) + '.txt';
-            fs.writeFileSync(fileinfo.txt, pdfparser.getRawTextContent());
-            resolve(fileinfo);
-        })
-        pdfparser.loadPDF(fileinfo.pdf);
-    })
-
-}
-async function convertPDF(fileinfo) {
+const TOPDF = (file) => {
     return new Promise((resolve, reject) => {
         const toPdf = require("office-to-pdf");
-        const wordBuffer = fs.readFileSync(fileinfo.dest);
-        fileinfo.pdf = path.join(fileinfo.dirname, fileinfo.basename)+ ".pdf";
+        const wordBuffer = fs.readFileSync(file.path);
+        file.pdf = path.join(file.dir, file.basename) + ".pdf";
         toPdf(wordBuffer).then(
             (pdfBuffer) => {
-                fs.writeFileSync(fileinfo.pdf, pdfBuffer);
-                resolve(fileinfo);
+                fs.writeFileSync(file.pdf, pdfBuffer);
+                console.log("Convert PDF is finishing.")
+                resolve(file)
             }, (err) => {
                 throw err;
-                reject(err);
             }
         );
     })
 }
-function asyncDelete(fileinfo) {
+const TOTXT = (file) => {
     return new Promise((resolve, reject) => {
-        fs.unlinkSync(fileinfo.pdf);
+        const PDFParser = require('pdf2json'),
+            fs = require('fs'),
+            pdfparser = new PDFParser(this, 1);
+        pdfparser.on("pdfParser_dataError", errData => { throw errData; });
+        pdfparser.on("pdfParser_dataReady", pdfData => {
+            file.txt = path.join(file.dir, '/txt/', file.basename) + '.txt';
+            fs.writeFileSync(file.txt, pdfparser.getRawTextContent());
+            resolve(file);
+        })
+        pdfparser.loadPDF(file.pdf);
     })
 }
-
+const delfile = async (file) => {
+    return new Promise((resolve, reject) => {
+        fs.unlinkSync(file.pdf);
+        resolve(file)
+    })
+}
+const converter = async (file) => {
+    if (file.extname === '.pdf') {
+        file.pdf = file.path;
+        await TOTXT(file);
+        delete file.pdf;
+    }
+    else if (file.extname === '.ppt' || file.extname === '.pptx' || file.extname === '.doc' || file.extname === '.docx' || file.extname === '.xls') {
+        console.log("Convert to PDF");
+        await TOPDF(file).then(file => TOTXT(file)).then(file => delfile(file)).catch(err => console.log(err));
+    } else
+        file.txt = null;
+    return file;
+}
 module.exports = converter;

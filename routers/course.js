@@ -1,21 +1,23 @@
 const router = require('express').Router();
-const authenticate = require('../middlewares/authenticate');
-const courseController = require('../controllers/course');
+const course = require('../controllers/course');
+const { verifyToken, verifyCourseMember } = require('../middlewares/authenticate');
 const { uploadImage } = require('../utils/uploader');
 
 
 /* ----------  Route for course user  ---------- */
 router
     .route('/')
-    .get(courseController.getCourseList)
-    .post(authenticate.verifyToken, uploadImage.any(), courseController.createCourse);
+    .get(course.getCourseList)
+    .post(verifyToken, uploadImage.any(), course.createCourse);
+
+router
+    .route('/self')
+    .get(verifyToken, course.getUserCourseList)
 
 router
     .route('/:courseId')
-    .get()
-    .put()
-    .delete();
-
+    .put(verifyToken, verifyCourseMember, uploadImage.any(), course.updateCourse)
+    .delete(verifyToken, verifyCourseMember, course.deleteCourse);
 
 /* ----------  Route for course user  ---------- */
 router

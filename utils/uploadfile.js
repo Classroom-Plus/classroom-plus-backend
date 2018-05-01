@@ -5,6 +5,7 @@ const fileupload = async (fileinfo, ori) => {
     console.log(message);
     return fileinfo;
 };
+
 function asyncUpload(fileinfo, ori) {
     return new Promise((resolve, reject) => {
         readStream = fs.createReadStream(ori);

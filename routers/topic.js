@@ -1,16 +1,16 @@
 const router = require('express').Router(),
     controller = require('../controllers/topic'),
-    authenticate = require('../middlewares/authenticate');
-
-router
-    .route('/course/:courseId/user/:userId')
-    .post(controller.addTopic);
-router
-    .route('/course/:courseId/user/:userId/topic/:topic_id')
-    .put(controller.alterTopic)
-    .delete(controller.deleteTopic);
+    auth = require('../middlewares/authenticate'),
+    upload=require('../utils/uploader');
 router
     .route('/course/:courseId')
-    .get(controller.getTopic);
+    .post(auth.verifyToken,auth.verifyCourseMember,upload.uploadImage.any(),controller.addTopic)
+    .get(auth.verifyToken,auth.verifyCourseMember,controller.getTopics);
+
+router
+    .route('/course/:courseId/topic/:topicId')
+    .delete(auth.verifyToken,auth.verifyCourseMember,controller.deleteTopic)
+    .get(auth.verifyToken,auth.verifyCourseMember,controller.getTopic)
+    .put(auth.verifyToken,auth.verifyCourseMember,controller.alterTopic);
 
 module.exports = router;

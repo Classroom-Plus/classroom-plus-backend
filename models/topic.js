@@ -8,12 +8,12 @@ module.exports = (sequelize, DataTypes) => {
         course_id: {
             type: DataTypes.INTEGER.UNSIGNED.ZEROFILL,
             allowNull: false,
-            unique: true
+            unique: false
         },
         created_user_id:{
             type: DataTypes.INTEGER.UNSIGNED.ZEROFILL,
             allowNull: false,
-            unique: true
+            unique: false
         },
         topic_type: {
             type: DataTypes.STRING,

@@ -44,7 +44,6 @@ const signIn = async (req, res) => {
             });
         }
     } catch (error) {
-        console.log(error);
         return res.sendStatus(400);
     }
 };
@@ -70,20 +69,23 @@ const signUp = async (req, res) => {
                 password: await bcrypt.hash(password, 10),
                 group_id: await db.Group.findOne({ where: { group_name: groupName } }).get('id')
             }
-        }).spread((user, isCreate) => {
+        }).spread(async (user, isCreate) => {
             if (isCreate) {
-                return res.json({
-                    status: true
+                isCreate = await db.UserInfo.create({
+                    user_id: user.get('id')
                 });
-            } else {
-                return res.json({
-                    status: false,
-                    errors: { msg: 'user has already existed' }
-                });
+                if (isCreate) {
+                    return res.json({
+                        status: true
+                    });
+                }
             }
+            return res.json({
+                status: false,
+                errors: { msg: 'user has already existed' }
+            });
         });
     } catch (error) {
-        console.log(error);
         return res.sendStatus(400);
     }
 };
@@ -111,7 +113,6 @@ const resetPassword = async (req, res) => {
             status: true,
         });
     } catch (error) {
-        console.log(error);
         return res.sendStatus(400);
     }
 }

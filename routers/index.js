@@ -17,4 +17,5 @@ router.use('/api/course', course);
 router.use('/api/schedule', schedule);
 router.use('/api/topic', topic);
 router.use('/api/material',material);
+
 module.exports = router;

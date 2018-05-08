@@ -1,0 +1,1047 @@
+Textbook: Advanced Programming in the UNIX Environment, 3rd Edition, W. Richard Stevens and Stephen A. Rago1
+Chapter 4. 
+Files and Directories
+System Programming
+http://www.cs.ccu.edu.tw/~pahsiung/courses/sp
+熊博安
+國立中正大學資訊工程學系
+pahsiung@cs.ccu.edu.twClass: EA-001
+(05)2720411 ext. 23100, 33119Office: EA-108, EA-512
+----------------Page (0) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan2
+4.1 Introduction
+Features of filesystem
+Properties of a file
+stat() function
+stat structure
+Functions to change owner, 
+permissions, ...
+File system structure & symbolic links
+Descending directory hierarchy
+----------------Page (1) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan3
+4.2 stat(), fstat(), fstatat(), 
+lstat()
+#include <sys/stat.h>
+int stat(const char *restrict pathname, 
+struct stat *restrict buf);
+int fstat(int fd, struct stat *buf);
+int lstat(const char *restrict pathname, 
+struct stat *restrict buf);
+int fstatat(int fd, 
+const char *restrict pathname, 
+struct stat *restrict buf, int flag);
+All return: 0 if OK, -1 on error
+----------------Page (2) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan4
+4.2 stat(), fstat(), fstatat(), 
+lstat()
+stat() returns a structure of information 
+about a given file
+fstat() returns information about a file that 
+is already open on descriptor fd
+lstat() returns information about a symbolic 
+link (not the file referenced by the link)
+fstatat() same as stat(), except relative to 
+an open directory (fd). The flag argument 
+controls whether links are followed. 
+(AT_SYMLINK_NOFOLLOW flag)
+----------------Page (3) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan5
+struct stat
+struct stat {
+mode_t st_mode;/* file type & mode */
+ino_t st_ino; /* i-node # */
+dev_t st_dev; /* device # */
+dev_t st_rdev; /* device # of special files*/
+nlink_t st_nlink;/* # of links */
+uid_t st_uid; /* owner UID (user ID) */
+gid_t st_gid; /* owner GID (group ID) */
+off_t st_size; /* size in bytes of regular files */
+struct timespec st_atim; /* time of last access */
+struct timespec st_mtim; /* time of last modification*/
+struct timespec st_ctim; /*time of last file status change*/
+blksize_t st_blksize; /* best I/O block size 
+*/
+blkcnt_t st_blocks; /* # disk blocks allocated */
+};
+----------------Page (4) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan6
+4.3 File Types
+Regular file: contains data, 
+interpretation left to application program
+Directory file: contains names of other 
+files and pointers to information on 
+these files
+Character special file: unbuffered I/O in 
+variable-sized units, used for certain 
+types of devices, such as terminal
+----------------Page (5) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan7
+4.3 File Types
+Block special file: buffered I/O access in 
+fixed-size units, used for disk drives
+FIFO: used for interprocess communication, 
+named pipe (see Section 15.5)
+Socket: used for network communication 
+(see Chapter 16)
+Symbolic link: points to another file (Section 
+4.17)
+----------------Page (6) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan8
+Macros to detect file types
+MacroType of file
+S_ISREG()Regular file
+S_ISDIR()Directory file
+S_ISCHR()Character special file
+S_ISBLK()Block special file
+S_ISFIFO()Pipe or FIFO
+S_ISLNK()Symbolic link 
+(not in POSIX.1 or SVR4)
+S_ISSOCK()Socket (not in POSIX.1 or SVR4)
+Argument: stat.st_mode<sys/stat.h>
+----------------Page (7) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan9
+Macros to detect IPC type
+Argument: stat
+POSIX.1 allows implementations to represent IPC 
+objects as files, e.g. semaphores, message 
+queues, etc. (No OS from the book does that 
+now)
+MacroType of object
+S_TYPEISMQ()Message queue
+S_TYPEISSEM()Semaphore
+S_TYPEISSHM()Shared memory 
+object
+----------------Page (8) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan10
+Figure 4.3: print file types
+#include“apue.h"
+int
+main(int argc, char *argv[])
+{
+inti;
+struct statbuf;
+char*ptr;
+for (i = 1; i < argc; i++) {
+printf("%s: ", argv[i]);
+if (lstat(argv[i], &buf) < 0) {
+err_ret("lstat error");
+continue;
+}
+----------------Page (9) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan11
+Figure 4.3: print file types
+if      (S_ISREG(buf.st_mode))ptr = "regular";
+else if (S_ISDIR(buf.st_mode))ptr = "directory";
+else if (S_ISCHR(buf.st_mode))ptr = "character 
+special";
+else if (S_ISBLK(buf.st_mode))ptr = "block special";
+else if (S_ISFIFO(buf.st_mode))ptr = "fifo";
+else if (S_ISLNK(buf.st_mode))ptr = "symbolic link";
+else if (S_ISSOCK(buf.st_mode))ptr = "socket";
+elseptr = "** unknown mode **";
+printf("%s\n", ptr);
+}
+exit(0);
+}
+----------------Page (10) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan12
+Figure 4.3: (output)
+$ ./a.out /etc/passwd /etc /dev/log /dev/tty  \
+> /var/lib/oprofile/opd_pipe /dev/sr0 /dev/cdrom
+/etc/passwd: regular
+/etc: directory
+/dev/log: socket
+/dev/tty: character special
+/var/lib/oprofile/opd_pipe: fifo
+/dev/sr0: block special
+/dev/cdrom: symbolic link
+----------------Page (11) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan13
+Count File Types
+File typeCountPercentage
+Regular file415,80379.77%
+Directory62,19711.93%
+Symbolic link40,0188.25%
+Character special1550.03%
+Block special470.01%
+Socket450.01%
+FIFO00.0%
+----------------Page (12) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan14
+4.4 Set-User-ID & Set-Group-
+ID
+Each process has 6 or more IDs:
+Real user ID
+Real group ID
+Who we really are
+Effective user ID
+Effective group ID
+Supplementary group 
+IDs
+Used for file access 
+permission checks
+Saved set-user-ID
+Saved set-group-ID
+Saved by exec 
+functions
+----------------Page (13) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan15
+4.4 Set-User-ID & Set-Group-
+ID
+Set-user-ID
+A special flag in “st_mode” says:
+“when this file is executed, set the 
+effective user ID of the process to be the 
+owner of the file (st_uid)”
+Example: “passwd” is set-user-id, 
+user can thus write to:
+/etc/passwd    or  /etc/shadow 
+(which are root-writable only)
+More details 
+in Chapter 8
+More details 
+in Chapter 8
+----------------Page (14) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan16
+4.5 File Access Permissions
+9 permission bits
+E.g.: rwxr-xr-- (read, write, execute)
+Divided into 3 categories
+User (or owner)
+Group
+Other (or world)
+“chmod” command can be used to 
+change permission bits
+----------------Page (15) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan17
+4.5 File Access Permissions
+st_mode maskMeaning
+S_IRUSRuser-read
+S_IWUSRuser-write
+S_IXUSRuser-execute
+S_IRGRPgroup-read
+S_IWGRPgroup-write
+S_IXGRPgroup-execute
+S_IROTHother-read
+S_IWOTHother-write
+S_IXOTHother-execute
+----------------Page (16) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan18
+4.5 File Access Permissions
+To open a file, we need execute permissions 
+in each directory mentioned in the pathname
+To open /usr/include/stdio.h, need “x” for:
+/
+/usr
+/usr/include
+Read permission for directory
+Can list all filenames in the directory
+Execute permission for directory
+Can search through the directory (for file access)
+----------------Page (17) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan19
+4.5 File Access Permissions
+For O_TRUNC flag in open function, we 
+need write permission for the file
+To create a file, we need write and 
+execute permissions in the directory
+To delete a file, we need write and 
+execute permissions in the directory
+no need of read/write permissions for file
+----------------Page (18) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan20
+4.5 File Access Permissions
+Kernel tests:
+If effective UID=0, grant access.
+If effective UID=owner UID:
+if permission bits set, grant access
+else deny permission
+If effective GID=owner GID:
+if permission bits set, grant access
+else deny permission
+If other permission bits set, grant 
+access.
+----------------Page (19) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan21
+4.6 Ownership of New Files 
+and Directories
+New File or Directory
+UID = Effective UID of process
+GID = (either of the following two)
+Effective GID of process
+Linux: not default, can be set by mount command
+GID of directory in which file is being created
+FreeBSD 8.0 and Mac OS X 10.6.8 (always)
+Linux 3.2.0 and Solaris 10 
+(with set-group-ID bit enabled for directory)
+----------------Page (20) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan22
+4.7 access and faccessat
+#include <unistd.h>
+int access ( const char *pathname, 
+int mode);
+int faccessat(int fd, const char *pathname, int mode, 
+int flag);
+Return: 0 if OK, -1 on error
+modeDescription
+R_OKTest for read permission
+W_OKTest for write permission
+X_OKTest for execute permission
+F_OKTest for existence of file
+bitwise 
+OR
+----------------Page (21) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan23
+Figure 4.8: access()
+#include“apue.h"
+#include<fcntl.h>
+int main(int argc, char *argv[])
+{
+if (argc != 2) err_quit("usage: a.out <pathname>");
+if (access(argv[1], R_OK) < 0)
+err_ret("access error for %s", argv[1]);
+else printf("read access OK\n");
+if (open(argv[1], O_RDONLY) < 0)
+err_ret("open error for %s", argv[1]);
+else printf("open for reading OK\n");
+exit(0);
+}
+----------------Page (22) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan24
+Figure 4.8: output
+$ ls –l a.out
+-rwxrwxr-x 1sar 15945 Nov 30 12:10a.out
+$ ./a.out a.out
+read access OK
+open for reading OK
+$ ls –l /etc/shadow
+-r--------   1root1315Jul 17 2002/etc/shadow
+$ ./a.out /etc/shadow
+access error for /etc/shadow: Permission denied
+open error for /etc/shadow: Permission denied
+----------------Page (23) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan25
+Figure 4.8: output (contd)
+$ su
+Password:
+# chown root a.out
+# chmod u+s a.out
+# ls –l a.out
+-rwsrwxr-x   1root15945Nov 30 12:10a.out
+# exit
+$ ./a.out /etc/shadow
+access error for /etc/shadow: Permission denied
+open for reading OK
+----------------Page (24) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan26
+4.8 umask Function
+#include <sys/stat.h>
+mode_t umask(mode_t cmask);
+Returns: previous file mode creation mask
+cmask = OR { S_IRUSR, S_IWUSR, S_IXUSR, 
+S_IRGRP, S_IROTH, ...}
+Any bits that are on in the file mode creation 
+mask are turned off in file’s mode
+----------------Page (25) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan27
+Figure 4.9: umask()
+#include“apue.h"
+#include<fcntl.h>
+#define RWRWRW (S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH)
+int
+main(void)
+{
+umask(0);
+if (creat("foo", RWRWRW)  <  0 )
+err_sys("creat error for foo");
+umask(S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+if (creat("bar", RWRWRW)  <  0 )
+err_sys("creat error for bar");
+exit(0);
+}
+----------------Page (26) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan28
+Figure 4.9: output
+$ umask
+002    (files: 666 XOR 002,  dirs: 777 XOR 002)
+$ ./a.out
+ls –l foo bar
+-rw-------   1sar 0 Dec 7 21:20 bar
+-rw-rw-rw- 1sar 0 Dec 7 21:20 foo
+$ umask
+002
+octal 
+number
+s
+----------------Page (27) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan29
+Umask file access permission 
+bits
+Mask 
+bit
+Meaning
+0400User-read
+0200User-write
+0100User-execute
+0040Group-read
+0020Group-write
+0010Group-
+execute
+0004Other-read
+0002Other-write
+0001Other-execute
+Single UNIX specification:
+Requires symbolic form
+$ umask
+002
+$ umask –S  /*symbolic form*/
+u=rwx, g=rwx, o=rx
+$ umask 027
+$ umask –S
+u=rwx, g=rx, o=
+----------------Page (28) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan30
+4.9 chmod, fchmod, 
+fchmodat Functions
+#include <sys/stat.h>
+int chmod(const char *pathname, 
+mode_t mode);
+int fchmod(int fd, mode_t mode);
+int fchmodat(int fd, const char 
+*pathname, mode_t mode, int flag);
+Return: 0 if OK, -1 on error
+Effective UID of process = file owner or 
+root
+----------------Page (29) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan31
+mode in chmod()
+modeDescription
+S_ISUID, S_ISGID, 
+S_ISVTX
+Set UID, GID on exec
+saved-text (sticky bit)
+S_IRWXU, S_IRUSR, 
+S_IWUSR, S_IXUSR
+Read, write, exec by user 
+(owner): all or individual
+S_IRWXG, S_IRGRP, 
+S_IWGRP, S_IXGRP
+Read, write, exec by group: 
+all or individual
+S_IRWXO, S_IROTH, 
+S_IWOTH, S_IXOTH
+Read, write, exec by other 
+(world): all or individual
+<sys/stat.h>
+Bit-
+wise 
+OR
+----------------Page (30) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan32
+Figure 4.12: chmod()
+#include"apue.h"
+int
+main(void)
+{
+struct statstatbuf;
+/* turn on set-group-ID and turn off group-execute */
+if (stat("foo", &statbuf) < 0)
+err_sys("stat error for foo");
+if (chmod("foo", (statbuf.st_mode & ~S_IXGRP) | S_ISGID) < 0)
+err_sys("chmod error for foo");
+/* set absolute mode to "rw-r--r--" */
+if (chmod("bar", S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) < 0)
+err_sys("chmod error for bar");
+exit(0);
+}
+----------------Page (31) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan33
+Figure 4.12: output
+$ ls –l foo bar
+-rw-------  1 sar 0 Dec 7 21:20 bar
+-rw-rw-rw 1 sar 0 Dec 7 21:20 foo
+After Program 4.12 execution:
+$ ls –l foo bar
+-rw-r--r--   1 sar 0 Dec 7 21:20 bar
+-rw-rwSrw 1 sar 0 Dec 7 21:20 foo
+----------------Page (32) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan34
+chmod()
+chmod() automatically clears 2 bits:
+if we try to set sticky bit (S_ISVTX) 
+without superuser privileges
+setting S_ISGID without privileges
+To prevent a user from creating a set-
+group-ID file owned by a group that the 
+user doesn’t belong to
+----------------Page (33) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan35
+4.10 Sticky Bit (S_ISVTX)
+Earlier versions of UNIX
+program’s text (machine instructions) 
+was saved in swap space
+program loaded faster on 2nd execution
+sticky = stuck around (in swap space)
+saved text = sticky
+Newer systems have virtual memory & 
+fast filesystem, no need of sticky bit
+----------------Page (34) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan36
+Sticky Bit for directories
+A file can be removed or renamed only 
+if user has write permissions to dir and
+owns the file, OR
+owns the directory, OR
+is the superuser
+/tmp
+/var/tmp
+Should not be 
+able to delete 
+or rename 
+others’ files 
+----------------Page (35) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan37
+4.11 chown, fchown, 
+fchownat, and lchown 
+Functions
+#include <unistd.h>
+int chown(const char *pathname, 
+uid_t owner, gid_t group);
+int fchown(int fd, uid_t owner, 
+gid_t group);
+int fchownat(int fd, const *pathname, 
+uid_t owner, gid_t group);
+int lchown(const char *pathname, 
+uid_t owner, gid_t group);
+All return: 0 if OK, -1 on error
+Owner, group = 
+-1 unchanged
+----------------Page (36) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan38
+4.12 File Size
+st_size in stat structure specifies size of 
+file in bytes
+st_size = 0 for an empty regular file 
+(first read() returns EOF)
+st_size = multiple of 16 or 512 for directories
+st_size = #bytes(filename) for links
+lrwxrwxrwx 1 root 7 Sep 25 07:14 lib  usr/lib
+----------------Page (37) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan39
+Holes in a File
+$ ls –l core
+-rw-r--r-- 1 sar 8483248 Nov 18 12:18 core
+$ du –s core
+272 core
+(272 512-byte blocks=139,264 bytes)
+Many holes in the file!
+----------------Page (38) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan40
+Holes in a File
+$ wc –c core
+8483248 core
+Normal I/O operations read through file
+$ cat core > core.copy
+$ ls –l core*
+-rw-r--r--  1  stevens  8483248  Nov 18  12:18 core
+-rw-rw-r-- 1  stevens  8483248  Nov 18  12:27 core.copy
+$ du –s core*
+272core
+16592core.copy
+16592 x 512 = 8,495,104 bytes
+Difference in size due to 
+data blocks for storing 
+pointers to actual 
+data blocks.
+----------------Page (39) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan41
+4.13 File Truncation
+#include <unistd.h>
+int truncate(const char *pathname, 
+off_t length);
+int ftruncate(int fd, off_t length);
+Return: 0 if OK, -1 on error
+----------------Page (40) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan42
+File Truncation
+truncate(pathname, length)
+Truncates a file to length bytes
+file size > length  file size:= length
+file size < length  a hole created, 
+file size := length
+Solaris: extension of fcntl (F_FREESP) 
+allows freeing any part of a file, not just a chunk 
+at the end of file
+----------------Page (41) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan43
+4.14 File Systems (Fig. 4.13)
+----------------Page (42) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan44
+4.14 File Systems (Fig. 4.14)
+----------------Page (43) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan45
+4.14 File Systems
+i-node contains all info about file:
+file type
+file’s access permission bits
+file size
+pointers to data blocks for file
+...
+Inode # in dir points to an i-node in 
+the same filesystem
+Hence ln cannot link across filesystems
+----------------Page (44) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan46
+Filesystem (Fig. 4.15)
+After creating testdir
+----------------Page (45) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan47
+4.15 link, linkat, unlink, 
+unlinkat, remove Functions
+#include <unistd.h>
+int link(const char *existingpath, 
+const char *newpath);
+int linkat(int efd, 
+const char *existingpath, 
+const char *newpath, int flag);
+Return: 0 if OK, -1 on error
+Creation of a new directory entry and 
+increment of link count must be ATOMIC!!!
+----------------Page (46) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan48
+unlink, unlinkat Functions
+#include <unistd.h>
+int unlink(const char *pathname);
+int unlinkat(int fd, const char *pathname, 
+int flag);
+Return: 0 if OK, -1 on error
+Removes directory entry
+Decrements link count
+File deleted only when link count = 0 and 
+open count = 0
+----------------Page (47) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan49
+Figure 4.16: Open a file and 
+unlink it
+#include"apue.h"
+#include<fcntl.h>
+int
+main(void)
+{
+if (open("tempfile", O_RDWR) < 0)
+err_sys("open error");
+if (unlink("tempfile") < 0)
+err_sys("unlink error");
+printf("file unlinked\n");
+sleep(15);
+printf("done\n");
+exit(0);
+}
+----------------Page (48) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan50
+Figure 4.16: output
+$ ls –l tempfile
+-rw-r--r-- 1 sar 413265408 Jan 21 07:14 tempfile
+$ df /home
+Filesystem  1K-blocks      Used    Available    Use%  Mounted on
+/dev/hda4 11021440 1956332     9065108     18%  /home
+$ a.out &
+1364
+file unlinked
+$ ls –l tempfile
+ls: tempfile: No such file or directory
+$ df /home
+Filesystem  1K-blocks      Used    Available    Use%  Mounted on
+/dev/hda4 11021440 1956332     9065108     18%   /home
+$ done
+df /home
+Filesystem  1K-blocks      Used    Available   Use%  Mounted on
+/dev/hda4 11021440 1552352     9469088    15%   /home
+No 
+change 
+in 
+space
+----------------Page (49) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan51
+Property of unlink Function
+Property
+File deleted only when link count = 0 and 
+open count = 0
+This property is used for temporary files
+Won’t be left around if program crashes
+open() or creat() temporary file
+unlink() immediately
+File is not deleted, because still open
+File is deleted only when process terminates 
+or closes it
+----------------Page (50) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan52
+remove Function
+#include <stdio.h>
+int remove(const char *pathname);
+Returns: 0 if OK, -1 on error
+For files: Identical to unlink()
+For directories: Identical to rmdir()
+----------------Page (51) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan53
+4.16 rename and renameat 
+Functions
+#include <stdio.h>
+int rename(const char *oldname, 
+const char *newname);
+int renameat(int oldfd,
+const char *oldname, int newfd,
+const char *newname);
+Return: 0 if OK, -1 on error
+If newname exists:
+If both are files, 
+newname is deleted
+oldname is renamed as newname
+If both are directories and newname is empty
+oldname is deleted
+oldname is renamed as newname
+(Cannot rename /usr/foo to /usr/foo/testdir)
+----------------Page (52) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan54
+4.17 Symbolic Links
+Hard link
+Points directly to an i-node of a file
+Must be in the same file system as the file
+Only superuser can create a hard link to a 
+directory
+Used for file system construction
+Symbolic link
+An indirect pointer to a file
+Can link across file systems
+Anyone can link to a directory
+Used to move a file or an entire directory 
+hierarchy to somewhere else
+----------------Page (53) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan55
+Symbolic Links (Fig. 4.17)
+If function follows links, argument refers to the actual file
+If function does not follow links, argument refers to the link
+----------------Page (54) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan56
+Symbolic links create loops
+$ mkdir foo
+$ touch foo/a
+$ ln –s ../foo foo/testdir
+$ ls –l foo
+total 0
+-rw-r-----   1 sar 0 Jan 22 00:16 a
+lrwxrwxrwx 1 sar 6 Jan 22 00:16 testdir../foo
+----------------Page (55) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan57
+Symbolic Links (loops)
+write a program using ftw (walk fs)
+RESULT:
+foo
+foo/a
+foo/testdir
+foo/testdir/a
+foo/testdir/testdir
+foo/testdir/testdir/a
+foo/testdir/testdir/testdir
+foo/testdir/testdir/testdir/a
+ftw returned -1: Too many levels of symbolic links
+Linux ftw, nftw: record all dirs seen 
+and avoid processing a directory 
+more than once.
+----------------Page (56) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan58
+Symbolic Link (Fig. 4.18)
+----------------Page (57) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan59
+Symbolic Link
+open() follows symbolic links
+$ ln –s /no/such/file myfile
+$ ls myfile
+myfile
+$ cat myfile
+cat: myfile: No such file or directory
+$ ls –l myfile
+lrwxrwxrwx 1 sar 13 Jan 22 00:26 myfile  /no/such/file
+----------------Page (58) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan60
+4.18 Creating and Reading 
+Symbolic Links
+#include <unistd.h>
+int symlink(const char *actualpath, 
+const char *sympath);
+int symlinkat(const char *actualpath, 
+int fd, const char *sympath);
+Return: 0 if OK, -1 on error
+Creates a symbolic link: 
+sympath  actualpath
+open() cannot open a link, so what if 
+we want to read a link?
+----------------Page (59) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan61
+readlink, readlinkat 
+Functions
+#include <unistd.h>
+int readlink(const char *restrict pathname, 
+char *restrict buf, size_t bufsize);
+int readlinkat(int fd, const char *restrict 
+pathname, char *restrict buf, size_t bufsize);
+Return: #bytes read if OK, -1 on error
+Combines open, read, & close
+buf: name of link, not null terminated
+----------------Page (60) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan62
+4.19 File Times
+----------------Page (61) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan63
+3 times of functions (Fig. 
+4.20)
+access, stat 
+functions do not
+change any of 
+the 3 times
+----------------Page (62) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan64
+4.20 futimens, utimensat, 
+and utimes Functions
+#include <sys/stat.h>
+int futimens(int fd, 
+const struct timespec times[2]);
+int utimensat(int fd, const char *path, 
+const struct timespec times[2], 
+int flag);
+Return: 0 if OK, -1 on error
+----------------Page (63) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan65
+4.20 futimens, utimensat, 
+and utimes Functions
+Depends on times pointer
+NULL, set a and m times to current
+If tv_nsec=UTIME_NOW, set to current
+If tv_nsec=UTIME_OMIT, no change
+Otherwise, set to the times pointer
+Access permissions required:
+To set to current time
+owner of file with write permission or superuser
+To set to times
+owner of file or superuser
+----------------Page (64) Break----------------
+4.20 futimens, utimensat, 
+and utimes Functions
+#include <sys/time.h>
+int utimes(const char *pathname, 
+const struct timeval times[2]);
+Returns: 0 if OK, -1 on error
+struct timeval {
+time_t tv_sec; /* seconds */
+long tv_usec; /* microseconds */
+}
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan66
+----------------Page (65) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan67
+Figure 4.21: futimens
+#include"apue.h"
+#include<fcntl.h>
+int
+main(int argc, char *argv[])
+{
+inti, fd;
+struct statstatbuf;
+struct timespectimes[2];
+for (i = 1; i < argc; i++) {
+if (stat(argv[i], &statbuf) < 0) {/* fetch current times */
+err_ret("%s: stat error", argv[i]);
+continue;
+}
+----------------Page (66) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan68
+Figure 4.21: utime()
+if (fd=open(argv[i], O_RDWR | O_TRUNC) < 0) {/* truncate */
+err_ret("%s: open error", argv[i]);
+continue;
+}
+times[0]  = statbuf.st_atim;
+times[1] = statbuf.st_mtim;
+if (futimens(fd, times) < 0)/* reset times */
+err_ret("%s: futimens error", argv[i]);
+close(fd);
+}
+exit(0);
+}
+----------------Page (67) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan69
+Figure 4.21: output
+$ ls –l changemod times
+-rwxr-xr-x 1 sar 13792 Jan 22 01:26 changemod
+-rwxr-xr-x 1 sar 13824 Jan 22 01:26 times
+$ ls –lu changemod times
+-rwxr-xr-x 1 sar 13792 Jan 22 22:22 changemod
+-rwxr-xr-x 1 sar 13824 Jan 22 22:22 times
+$ date
+Fri Jan 27 20:53:46 EST 2012
+----------------Page (68) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan70
+Figure 4.21: output (contd)
+$ ./a.out changemod times
+$ ls –l changemod times
+-rwxr-xr-x 1 sar 0 Jan 22 01:26 changemod
+-rwxr-xr-x 1 sar 0 Jan 22 01:26 times
+$ ls –lu changemod times
+-rwxr-xr-x 1 sar 0 Jan 22 22:22 changemod
+-rwxr-xr-x 1 sar 0 Jan 22 22:22 times
+$ ls –lc changemod times
+-rwxr-xr-x 1 sar 0 Jan 27 20:53 changemod
+-rwxr-xr-x 1 sar 0 Jan 27 20:53 times
+----------------Page (69) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan71
+4.21 mkdir, mkdirat and 
+rmdir Functions
+#include <sys/stat.h>
+int mkdir(const char *pathname, 
+mode_t mode);
+int mkdirat(int fd, const char *pathname, 
+mode_t mode);
+Return: 0 if OK, -1 on error
+Creates a new, empty directory
+. and .. are automatically created
+mode are modified by file mode 
+creation mask of the process (umask)
+----------------Page (70) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan72
+rmdir()
+#include <unistd.h>
+int rmdir(const char *pathname);
+Returns: 0 if OK, -1 on error
+Only when link count = 0 and Open 
+count = 0 is the space of directory freed
+----------------Page (71) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan73
+4.22 Reading Directories
+Anyone can read a dir with permissions
+Only kernel can write a directory
+(diff from create/deleting files in a dir)
+struct dirent {/*defined in <dirent.h>*/
+ino_t d_ino;           /* i-node # */
+char d_name[NAME_MAX + 1]; 
+      /* NULL-terminated filename */
+}
+----------------Page (72) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan74
+opendir(), rewinddir(), closedir()
+#include <dirent.h>
+DIR *opendir(const char *pathname);
+DIR *fdopendir(int fd);
+struct dirent *readdir(DIR *dp);
+void rewinddir(DIR *dp);
+int closedir(DIR *dp);
+long telldir(DIR *dp);
+void seekdir(DIR *dp, long loc);
+----------------Page (73) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan75
+Walking the filesystem
+Similar to the nftw function in Solaris
+Traverses a file hierarchy
+Gives the counts and percentages of 
+different file types
+----------------Page (74) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan76
+----------------Page (75) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan77
+----------------Page (76) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan78
+----------------Page (77) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan79
+4.23 chdir, fchdir, and getcwd 
+Functions
+#include <unistd.h>
+int chdir(const char *pathname);
+int fchdir(int fd);
+Return: 0 if OK, -1 on error
+Current working directory is an attribute 
+of the process
+Home directory is an attribute of a login 
+name
+----------------Page (78) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan80
+Figure 4.23
+#include“apue.h"
+int
+main(void)
+{
+if (chdir("/tmp") < 0)
+err_sys("chdir failed");
+printf("chdir to /tmp succeeded\n");
+exit(0);
+}
+----------------Page (79) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan81
+Figure 4.23: output
+$ pwd
+/usr/lib
+$ mycd
+chdir to /tmp succeeded
+$ pwd
+/usr/lib
+Current working directory not changed 
+because it is an attribute of the process! 
+chdir must be built-in for shells to 
+successfully change directory.
+----------------Page (80) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan82
+getcwd()
+#include <unistd.h>
+char *getcwd(char *buf, size_t size);
+Returns: buf if OK, NULL on error
+buf should be large enough to 
+accommodate absolute pathnames 
+plus a terminating null byte, or error.
+----------------Page (81) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan83
+Figure 4.24: getcwd()
+#include"apue.h"
+int
+main(void)
+{
+char *ptr;
+size_t size;
+if (chdir("/usr/spool/uucppublic") < 0)
+err_sys("chdir failed");
+ptr = path_alloc(&size);/* our own function */
+if (getcwd(ptr, size) == NULL)
+err_sys("getcwd failed");
+printf("cwd = %s\n", ptr);
+exit(0);
+}
+----------------Page (82) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan84
+Figure 4.24: output
+$ ./a.out
+cwd = /var/spool/uucppublic
+$ ls –l /usr/spool
+lrwxrwxrwx 1 root 12 Jan 31 07:57 /usr/spool  
+../var/spool
+----------------Page (83) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan85
+Figure 4.25: st_dev, st_rdev
+----------------Page (84) Break----------------
+Slides©2014 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan86
+Figure 4.25: output
+$ ./a.out / /home/sar /dev/tty[01]
+/: dev = 8/3
+/home/sar: dev = 8/4
+/dev/tty0: dev = 0/5 (character) rdev=4/0
+/dev/tty1: dev=0/5 (character) rdev=4/1
+$ mount
+/dev/sda3 on / type ext3 (rw,errors=remount,commit=0)
+/dev/sda4 on /home type ext3 (rw,commit=0)
+$ ls –l /dev/tty[01] /dev/sda[34] 
+brw-rw---- 1 root  8, 3 2011-07-01 11:08 /dev/sda3
+brw-rw---- 1 root  8, 4 2011-07-01 11:08 /dev/sda4
+crw--w---- 1 root  4, 0 2011-07-01 11:08 /dev/tty0
+crw------- 1 root  4, 1 2011-07-01 11:08 /dev/tty1
+----------------Page (85) Break----------------
+4.25 Summary of File Access 
+Permission Bits
+Slides©2006 Pao-Ann Hsiung, Dept of CSIE, National Chung Cheng University, Taiwan87
+----------------Page (86) Break----------------

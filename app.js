@@ -10,13 +10,13 @@ const router = require('./routers');
 app.use(cors());
 
 /* ----------  Static Files  ---------- */
-app.use(express.static('public'));
+app.use('/api', express.static('public'));
 
 /* ----------  body_parser  ---------- */
 app.use(body_parser.json());
 app.use(body_parser.urlencoded({ extended: false }));
 
 /* ----------  Routes  ---------- */
-app.use(router);
+app.use('/api', router);
 
 module.exports = app;

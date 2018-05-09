@@ -10,15 +10,15 @@ const topic_message=require('./message');
 const search=require('./search');
 
 /* ----------  Route for fb-messenger  ---------- */
-router.use('/api/webhook', webhooks);
+router.use('/webhook', webhooks);
 
 /* ----------  Route for api  ---------- */
-router.use('/api/account', account);
-router.use('/api/user', user);
-router.use('/api/course', course);
-router.use('/api/schedule', schedule);
-router.use('/api/topic', topic);
-router.use('/api/material',material);
-router.use('/api/search',search);
+router.use('/account', account);
+router.use('/user', user);
+router.use('/course', course);
+router.use('/schedule', schedule);
+router.use('/topic', topic);
+router.use('/material',material);
+router.use('/search',search);
 //router.use('/api/topic_message',topic_message);
 module.exports = router;

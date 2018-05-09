@@ -19,7 +19,7 @@ const getCourseList = async (req, res) => {
         if (courseList.length > 0) {
             courseList.map((element) => {
                 if (element.course_banner !== null) {
-                    element.course_banner = `${process.env.SERVER_IP}:${process.env.PORT}${element.course_banner}`;
+                    element.course_banner = `${process.env.BACKEND_SERVER_URL}${element.course_banner}`;
                 }
             });
         }
@@ -59,7 +59,7 @@ const getUserCourseList = async (req, res) => {
         if (courseList.length > 0) {
             courseList.map((element) => {
                 if (element.course_banner !== null) {
-                    element.course_banner = `${process.env.SERVER_IP}:${process.env.PORT}${element.course_banner}`;
+                    element.course_banner = `${process.env.BACKEND_SERVER_URL}${element.course_banner}`;
                 }
             });
         }

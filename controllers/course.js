@@ -92,7 +92,7 @@ const createCourse = async (req, res) => {
             course_type: courseType,
             course_name: courseName,
             course_banner: courseBanner,
-            course_info: courseInfo
+            course_info: JSON.parse(courseInfo)
         });
         if (course) {
             courseMember = await db.CourseMember.create({

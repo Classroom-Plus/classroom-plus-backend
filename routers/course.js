@@ -1,14 +1,15 @@
 const router = require('express').Router();
 const course = require('../controllers/course');
-const { verifyToken, verifyCourseMember } = require('../middlewares/authenticate');
-const { uploadImage } = require('../utils/uploader');
+const courseUser = require('../controllers/courseUser');
+const { verifyToken, verifyCourseMember, verifyCourseManger } = require('../middlewares/authenticate');
+const { uploadImages } = require('../utils/uploader');
 
 
 /* ----------  Route for course user  ---------- */
 router
     .route('/')
     .get(course.getCourseList)
-    .post(verifyToken, uploadImage.any(), course.createCourse);
+    .post(verifyToken, uploadImages, course.createCourse);
 
 router
     .route('/self')
@@ -16,20 +17,19 @@ router
 
 router
     .route('/:courseId')
-    .put(verifyToken, verifyCourseMember, uploadImage.any(), course.updateCourse)
-    .delete(verifyToken, verifyCourseMember, course.deleteCourse);
+    .put(verifyToken, verifyCourseManger, uploadImages, course.updateCourse)
+    .delete(verifyToken, verifyCourseManger, course.deleteCourse);
 
 /* ----------  Route for course user  ---------- */
 router
     .route('/:courseId/user')
-    .get()
-    .post();
+    .get(verifyToken, verifyCourseMember, courseUser.getUserList)
+    .post(verifyToken);
 
 router
     .route('/:courseId/user/:userId')
-    .get()
-    .put()
-    .delete();
+    .put(verifyToken, verifyCourseManger)
+    .delete(verifyToken, verifyCourseManger);
 
 
 /* ----------  Route for course topic  ---------- */

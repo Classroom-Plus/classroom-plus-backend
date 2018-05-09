@@ -1,11 +1,11 @@
 const multer = require('multer');
 const path = require('path');
 
-const storage = (destination) => {
+const storage = (destination, uploadedBy) => {
     return multer.diskStorage({
         destination: destination,
         filename: function (req, file, cb) {
-            cb(null, `${Date.now()}${path.extname(file.originalname)}`);
+            cb(null, `${Date.now()}_${uploadedBy}${path.extname(file.originalname)}`);
         }
     });
 };
@@ -22,23 +22,45 @@ const checkType = (types, file, cb) => {
     }
 };
 
-const uploadFile = multer({
-    storage: storage(path.resolve(__dirname, '../public/files')),
-    limits: { fileSize: 50 * 1024 * 1024 },
-    fileFilter: function (req, file, cb) {
-        checkType(/docx|doc|pptx|ppt|xlsx|xls|pdf/, file, cb);
-    }
-});
+const uploadFiles = (req, res, next) => {
+    multer({
+        storage: storage(path.resolve(__dirname, '../public/files', req.authData.id)),
+        limits: { fileSize: 50 * 1024 * 1024 },
+        fileFilter: function (req, file, cb) {
+            checkType(/docx|doc|pptx|ppt|xlsx|xls|pdf/, file, cb);
+        }
+    }).any()(req, res, (err) => {
+        if (err) {
+            return res.json({
+                status: false,
+                errors: { msg: `invaid type for upload files` }
+            })
+        } else {
+            next();
+        }
+    });
+};
 
-const uploadImage = multer({
-    storage: storage(path.resolve(__dirname, '../public/images')),
-    limits: { fileSize: 5 * 1024 * 1024 },
-    fileFilter: function (req, file, cb) {
-        checkType(/jpeg|jpg|png|gif/, file, cb);
-    }
-});
+const uploadImages = (req, res, next) => {
+    multer({
+        storage: storage(path.resolve(__dirname, '../public/images'), req.authData.id),
+        limits: { fileSize: 5 * 1024 * 1024 },
+        fileFilter: function (req, file, cb) {
+            checkType(/jpeg|jpg|png|gif/, file, cb);
+        }
+    }).any()(req, res, (err) => {
+        if (err) {
+            return res.json({
+                status: false,
+                errors: { msg: `invaid type for upload files` }
+            })
+        } else {
+            next();
+        }
+    });
+};
 
 module.exports = {
-    uploadFile,
-    uploadImage,
+    uploadFiles,
+    uploadImages
 };

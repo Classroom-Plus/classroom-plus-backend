@@ -42,9 +42,34 @@ const verifyCourseMember = async (req, res, next) => {
     } else {
         return res.sendStatus(403);
     }
-}; 
+};
+
+const verifyCourseManger = async (req, res, next) => {
+    let userId = req.authData.id;
+    let courseId = req.params.courseId;
+    let isCourseManager;
+
+    if (userId && courseId) {
+        isCourseManager = await db.CourseMember.findOne({
+            where: {
+                course_id: courseId,
+                course_member_id: userId,
+                course_member_identity: 1
+            },
+            raw: true
+        });
+        if (isCourseManager) {
+            next();
+        } else {
+            return res.sendStatus(403);
+        }
+    } else {
+        return res.sendStatus(403);
+    }
+}
 
 module.exports = {
     verifyToken,
-    verifyCourseMember
+    verifyCourseMember,
+    verifyCourseManger
 };

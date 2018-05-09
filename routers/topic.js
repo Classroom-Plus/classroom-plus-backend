@@ -4,7 +4,7 @@ const router = require('express').Router(),
     upload=require('../utils/uploader');
 router
     .route('/course/:courseId')
-    .post(auth.verifyToken,auth.verifyCourseMember,upload.uploadImage.any(),controller.addTopic)
+    .post(auth.verifyToken,auth.verifyCourseMember,upload.uploadImages,controller.addTopic)
     .get(auth.verifyToken,auth.verifyCourseMember,controller.getTopics);
 
 router

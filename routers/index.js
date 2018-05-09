@@ -10,7 +10,7 @@ const topic_message=require('./message');
 const search=require('./search');
 
 /* ----------  Route for fb-messenger  ---------- */
-router.use('/webhook', webhooks);
+router.use('/api/webhook', webhooks);
 
 /* ----------  Route for api  ---------- */
 router.use('/api/account', account);

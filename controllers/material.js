@@ -1,6 +1,6 @@
 const db = require('../models/');
 const path = require('path');
-const convert = require('../converter/converter');
+const convert = require('../utils/converter');
 const materailUpload = async (req, res) => {
     let courseId = req.params.courseId;
     let userId = req.authData.id;
@@ -24,7 +24,7 @@ const materailUpload = async (req, res) => {
                 if (await db.CourseMaterial.create({
                     course_id: courseId,
                     material_directory: file.dir,
-                    material_filename: file.filename,
+                    material_filename: `/public/course/${courseId}/${req.files[0].filename}` ,
                     material_convert: file.txt
                 })) return res.json({
                     status: true,

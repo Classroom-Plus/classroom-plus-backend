@@ -27,9 +27,9 @@ const addTopic = async (req, res) => {
         let filename;
         for(let i=0;i<req.files.length;i++){
             if(checkType(/jpeg|jpg|png|gif/,req.files[i])){
-                 filename = `public/images/${req.files[i].filename}`;
+                 filename = `/public/images/${req.files[i].filename}`;
             }else {
-                 filename = `public/files/${req.files[i].filename}`;
+                 filename = `/public/files/${req.files[i].filename}`;
             }
             content.files.push(filename);
         }
@@ -285,13 +285,13 @@ const getTopics = async (req, res) => {
             event.map((element) => {
                 if ('files' in element.event_info)
                     for (let i = 0; i < element.event_info.files.length; i++)
-                        element.event_info.files[i] = `${process.env.BACKEND_SERVER_URL}/${element.event_info.files[i]}`;
+                        element.event_info.files[i] = `${process.env.BACKEND_SERVER_URL}${element.event_info.files[i]}`;
             });
         if (topics.length > 0)
             topics.map((element) => {
                 if ('files' in element.topic_content)
                     for (let i = 0; i < element.topic_content.files.length; i++)
-                        element.topic_content.files[i] = `${process.env.BACKEND_SERVER_URL}/${element.topic_content.files[i]}`;
+                        element.topic_content.files[i] = `${process.env.BACKEND_SERVER_URL}${element.topic_content.files[i]}`;
             });
         all.topic = topics;
         all.announce = event;

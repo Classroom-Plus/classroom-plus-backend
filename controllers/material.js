@@ -108,28 +108,7 @@ const getFiles = async (req, res) => {
         });
     }
 }
-const downloadFiles = async (req, res) => {
-    let fileId = req.params.fileId;
-    let file;
-    if (!fileId)
-        return res.json({
-            status: false,
-            errors: { msg: 'incorrect parameters' }
-        });
-    try {
-        file = await db.CourseMaterial.findOne({where:{
-            id:fileId,
-            deleted_at:null
-        }})
-        let filepath= path.join(file.get('material_directory'),file.get('material_filename'));
-        return res.download(filepath,file.get('material_filename'))
-    } catch (error) {
-        return res.json({
-            status: false,
-            errors: { msg: 'database error' }
-        });
-    }
-}
+
 const getFile = async (req, res) => {
     let { courseId, fileId } = req.params;
     if (!courseId)
@@ -156,6 +135,5 @@ module.exports = {
     materailUpload,
     getFiles,
     deleteFile,
-    downloadFiles,
     getFile,
 }

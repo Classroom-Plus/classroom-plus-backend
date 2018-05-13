@@ -27,9 +27,9 @@ const addMessage= async (req,res)=>{
         let filename;
         for(let i=0;i<req.files.length;i++){
             if(checkType(/jpeg|jpg|png|gif/,req.files[i])){
-                 filename = `/images/${req.files[i].filename}`;
+                 filename = `/public/images/${req.files[i].filename}`;
             }else {
-                 filename = `/files/${req.files[i].filename}`;
+                 filename = `/public/files/${req.files[i].filename}`;
             }
             content.files.push(filename);
         }
@@ -77,11 +77,12 @@ const addUesrMessage =async (req,res)=>{
         });
     if(req.files){
         content.files = new Array();
+        let filename
         for(let i=0;i<req.files.length;i++){
             if(checkType(/jpeg|jpg|png|gif/,req.files[i])){
-                let filename = `/images/${req.files[i].filename}`;
+                 filename = `/public/images/${req.files[i].filename}`;
             }else {
-                let filename = `/files/${req.files[i].filename}`;
+                 filename = `/public/files/${req.files[i].filename}`;
             }
             content.files.push(filename);
         }

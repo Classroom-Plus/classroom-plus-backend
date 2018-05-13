@@ -6,7 +6,7 @@ const course = require('./course');
 const schedule = require('./schedule');
 const topic = require('./topic');
 const material=require('./material');
-const topic_message=require('./message');
+const message=require('./message');
 const search=require('./search');
 
 /* ----------  Route for fb-messenger  ---------- */
@@ -20,5 +20,5 @@ router.use('/schedule', schedule);
 router.use('/topic', topic);
 router.use('/material',material);
 router.use('/search',search);
-//router.use('/api/topic_message',topic_message);
+router.use('/message',message);
 module.exports = router;

@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const auth =require('../middlewares/authenticate');
-const upload=require('../utils/uploadMaterial');
+const upload=require('../utils/upload');
 const controller=require('../controllers/material');
 
 

@@ -23,8 +23,8 @@ const materailUpload = async (req, res) => {
             if (course.get('course_member_identity') === 1) {
                 if (await db.CourseMaterial.create({
                     course_id: courseId,
-                    material_directory: file.dir,
-                    material_filename: `/public/course/${courseId}/${req.files[0].filename}` ,
+                    material_directory:  `/public/course/${courseId}/`,
+                    material_filename: req.files[0].filename ,
                     material_convert: file.txt
                 })) return res.json({
                     status: true,
@@ -39,8 +39,10 @@ const materailUpload = async (req, res) => {
             }
         }
     } catch (error) {
-        console.log(error);
-        res.send(400);
+        return res.json({
+            status: false,
+            errors: { msg: 'database error' }
+        });
     }
 }
 const deleteFile = async (req, res) => {
@@ -75,8 +77,10 @@ const deleteFile = async (req, res) => {
             }
         }
     } catch (error) {
-        console.log(error);
-        res.send(400);
+        return res.json({
+            status: false,
+            errors: { msg: 'database error' }
+        });
     }
 }
 
@@ -88,10 +92,20 @@ const getFiles = async (req, res) => {
             errors: { msg: 'incorrect parameters' }
         });
     try {
-        await db.CourseMaterial.findAll({ where: { course_id: courseId, deleted_at: null } }).then(files => res.json(files));
+        let files=  await db.CourseMaterial.findAll({ where: { course_id: courseId, deleted_at: null } });
+       if(files){
+           files.map((element)=>{
+            element.material_directory=`${process.env.BACKEND_SERVER_URL}${element.material_directory}${element.material_filename}`;
+           })
+           console.log(files[0]);
+       }
+       return res.json(files);
     } catch (error) {
         console.log(error);
-        res.send(400);
+        return res.json({
+            status: false,
+            errors: { msg: 'database error' }
+        });
     }
 }
 const downloadFiles = async (req, res) => {
@@ -110,8 +124,10 @@ const downloadFiles = async (req, res) => {
         let filepath= path.join(file.get('material_directory'),file.get('material_filename'));
         return res.download(filepath,file.get('material_filename'))
     } catch (error) {
-        console.log(error);
-        res.send(400);
+        return res.json({
+            status: false,
+            errors: { msg: 'database error' }
+        });
     }
 }
 const getFile = async (req, res) => {
@@ -122,10 +138,18 @@ const getFile = async (req, res) => {
             errors: { msg: 'incorrect parameters' }
         });
     try {
-        await db.CourseMaterial.findAll({ where: { course_id: courseId, id: fileId, deleted_at: null } }).then(files => res.json(files));
+       let files=  await db.CourseMaterial.findAll({ where: { course_id: courseId, id: fileId, deleted_at: null } });
+       if(files){
+           files.map((element)=>{
+               element.download=`${process.env.SERVER_IP}:${process.env.PORT}/${element.material_directory}/${element.filename}`;
+           })
+           res.json (files);
+       }
     } catch (error) {
-        console.log(error);
-        res.send(400);
+        return res.json({
+            status: false,
+            errors: { msg: 'database error' }
+        });
     }
 }
 module.exports = {

@@ -1,5 +1,16 @@
 const db = require('../models/');
+const path =require('path');
+const checkType = (types, file) => {
+    const filetypes = types;
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = filetypes.test(file.mimetype);
 
+    if (mimetype && extname) {
+        return true 
+    } else {
+        return false
+    }
+};
 const addTopic = async (req, res) => {
     let userId = req.authData.id;
     let courseId = req.params.courseId;
@@ -11,16 +22,26 @@ const addTopic = async (req, res) => {
             status: false,
             errors: { msg: 'incorrect parameters' }
         })
-    if (req.files.length !== 0) {
+    if(req.files){
         content.files = new Array();
-        for (let i = 0; i < req.files.length; i++) {
-            let filename = `/images/${req.files[0].filename}`;
+        let filename;
+        for(let i=0;i<req.files.length;i++){
+            if(checkType(/jpeg|jpg|png|gif/,req.files[i])){
+                 filename = `public/images/${req.files[i].filename}`;
+            }else {
+                 filename = `public/files/${req.files[i].filename}`;
+            }
             content.files.push(filename);
         }
     }
     try {
         if (await db.Course.findOne({ where: { id: courseId } })) {
             if (topicType === 'announce') {
+                if(!req.body.eventDate) 
+                    return res.json({
+                        status: false,
+                        errors: { msg: 'incorrect parameters' }
+                    })
                 let eventDate = new Date(req.body.eventDate);
                 let course = await db.CourseMember.findOne({ where: { course_id: courseId, course_member_id: userId } });
                 if (course) {
@@ -67,8 +88,10 @@ const addTopic = async (req, res) => {
             })
         }
     } catch (error) {
-        console.log(error);
-        res.send(400);
+        return res.json({
+            status: false,
+            errors: { msg: 'database error' }
+        });
     }
 }
 
@@ -92,8 +115,10 @@ const deleteTopic = async (req, res) => {
             })
         }
     } catch (error) {
-        console.log(error);
-        res.send(400);
+        return res.json({
+            status: false,
+            errors: { msg: 'database error' }
+        });
     }
 }
 const deleteAnnounce = async (req, res) => {
@@ -129,8 +154,10 @@ const deleteAnnounce = async (req, res) => {
         }
 
     } catch (error) {
-        console.log(error);
-        res.send(400);
+        return res.json({
+            status: false,
+            errors: { msg: 'database error' }
+        });
     }
 }
 const alterAnnounce = async (req, res) => {
@@ -174,8 +201,10 @@ const alterAnnounce = async (req, res) => {
             }
         }
     } catch (error) {
-        console.log(error);
-        res.send(400);
+        return res.json({
+            status: false,
+            errors: { msg: 'database error' }
+        });
     }
 }
 const alterTopic = async (req, res) => {
@@ -214,8 +243,10 @@ const alterTopic = async (req, res) => {
             })
         }
     } catch (error) {
-        console.log(error);
-        res.send(400);
+        return res.json({
+            status: false,
+            errors: { msg: 'database error' }
+        });
     }
 }
 
@@ -254,20 +285,22 @@ const getTopics = async (req, res) => {
             event.map((element) => {
                 if ('files' in element.event_info)
                     for (let i = 0; i < element.event_info.files.length; i++)
-                        element.event_info.files[i] = `${process.env.SERVER_IP}:${process.env.PORT}${element.event_info.files[i]}`;
+                        element.event_info.files[i] = `${process.env.BACKEND_SERVER_URL}/${element.event_info.files[i]}`;
             });
         if (topics.length > 0)
             topics.map((element) => {
                 if ('files' in element.topic_content)
                     for (let i = 0; i < element.topic_content.files.length; i++)
-                        element.topic_content.files[i] = `${process.env.SERVER_IP}:${process.env.PORT}${element.topic_content.files[i]}`;
+                        element.topic_content.files[i] = `${process.env.BACKEND_SERVER_URL}/${element.topic_content.files[i]}`;
             });
         all.topic = topics;
         all.announce = event;
         return res.json(all);
     } catch (error) {
-        console.log(error);
-        res.send(400);
+        return res.json({
+            status: false,
+            errors: { msg: 'database error' }
+        });
     }
 }
 const getTopic = async (req, res) => {
@@ -294,8 +327,10 @@ const getAnnounce = async (req, res) => {
     try {
         await db.CourseEvent.findOne({ where: { course_id: courseId, deleted_at: null, id: eventId } }).then(announce => res.json(announce));
     } catch (error) {
-        console.log(error);
-        res.send(400);
+        return res.json({
+            status: false,
+            errors: { msg: 'database error' }
+        });
     }
 }
 module.exports = {

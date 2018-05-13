@@ -23,6 +23,7 @@ const checkType = (types, file, cb) => {
 };
 
 const uploadFiles = (req, res, next) => {
+    console.log(req);
     multer({
         storage: storage(path.resolve(__dirname, '../public/files', req.authData.id)),
         limits: { fileSize: 50 * 1024 * 1024 },

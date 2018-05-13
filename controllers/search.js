@@ -1,7 +1,11 @@
 const Search=require('../utils/search');
 const search= async (req,res)=>{
     let courseId=req.params.courseId;
-    console.log(req.body.keyword);
+    if(!req.body.keyword)
+        return res.json({
+            status:false,
+            errors:{msg:'no keyword'}
+        });
     let pages=await Search(courseId,req.body.keyword);
     res.json({
         pages

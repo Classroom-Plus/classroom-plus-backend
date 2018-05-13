@@ -8,17 +8,10 @@ module.exports = (sequelize, DataTypes) => {
         topic_id: {
             type: DataTypes.INTEGER.UNSIGNED.ZEROFILL,
             allowNull: false,
-            unique: true
         },
         created_user_id: {
             type: DataTypes.INTEGER.UNSIGNED.ZEROFILL,
             allowNull: false,
-            unique: true
-        },
-        message_uuid: {
-            type: DataTypes.UUID,
-            allowNull: false,
-            unique: true
         },
         ref_uuid: {
             type: DataTypes.STRING(36).BINARY,

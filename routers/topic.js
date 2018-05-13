@@ -1,10 +1,10 @@
 const router = require('express').Router(),
     controller = require('../controllers/topic'),
     auth = require('../middlewares/authenticate'),
-    upload = require('../utils/uploader');
+    upload = require('../utils/upload');
 router
     .route('/course/:courseId')
-    .post(auth.verifyToken, auth.verifyCourseMember, upload.uploadImages, controller.addTopic)
+    .post(auth.verifyToken, auth.verifyCourseMember,upload.uploadMessage.any() ,controller.addTopic)
     .get(auth.verifyToken, auth.verifyCourseMember, controller.getTopics);
 
 router

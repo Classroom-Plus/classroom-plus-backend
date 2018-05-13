@@ -214,7 +214,14 @@ const getMessages = async (req,res)=>{
             errors: { msg: 'incorrect parameters' }
         });
     try {
-        await db.TopicMessage.findAll({where:{topic_id:topicId,deleted_at:null}}).then(messages=>res.json(messages));
+        let messages= await db.TopicMessage.findAll({where:{topic_id:topicId,deleted_at:null}});
+        if(messages){
+            messages.map((element)=>{
+                if('files' in element.topic_message )
+                    element.topic_message.files[0]=`${process.env.BACKEND_SERVER_URL}${element.topic_message.files[0]}`
+            })
+        }
+        return res.json(messages);
     } catch (error) {
         return res.json({
             status: false,
@@ -230,9 +237,14 @@ const getMessage =async (req,res)=>{
             errors: { msg: 'incorrect parameters' }
         });
     try {
-        await db.TopicMessage.findOne({
-            where:{topic_id:topicId,id:messageId,deleted_at:null}
-        }).then(message=>res.json(message));
+        let messages= await db.TopicMessage.findAll({where:{id:messageId,deleted_at:null}});
+        if(messages){
+            messages.map((element)=>{
+                if('files' in element.topic_message )
+                    element.topic_message.files[0]=`${process.env.BACKEND_SERVER_URL}${element.topic_message.files[0]}`
+            })
+        }
+        return res.json(messages);
     } catch (error) {
         return res.json({
             status: false,

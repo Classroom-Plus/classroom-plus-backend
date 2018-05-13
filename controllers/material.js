@@ -97,7 +97,6 @@ const getFiles = async (req, res) => {
            files.map((element)=>{
             element.material_directory=`${process.env.BACKEND_SERVER_URL}${element.material_directory}${element.material_filename}`;
            })
-           console.log(files[0]);
        }
        return res.json(files);
     } catch (error) {
@@ -120,7 +119,8 @@ const getFile = async (req, res) => {
        let files=  await db.CourseMaterial.findAll({ where: { course_id: courseId, id: fileId, deleted_at: null } });
        if(files){
            files.map((element)=>{
-               element.material_directory=`${process.env.BACKEND_SERVER_URL}${element.material_directory}${element.material_filename}`;
+               element.download ="";
+               element.download=`${process.env.BACKEND_SERVER_URL}${element.material_directory}${element.material_filename}`;
            })
            res.json (files);
        }

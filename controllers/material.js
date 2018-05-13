@@ -141,7 +141,7 @@ const getFile = async (req, res) => {
        let files=  await db.CourseMaterial.findAll({ where: { course_id: courseId, id: fileId, deleted_at: null } });
        if(files){
            files.map((element)=>{
-               element.download=`${process.env.SERVER_IP}:${process.env.PORT}/${element.material_directory}/${element.filename}`;
+               element.material_directory=`${process.env.BACKEND_SERVER_URL}${element.material_directory}${element.material_filename}`;
            })
            res.json (files);
        }

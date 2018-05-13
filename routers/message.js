@@ -4,12 +4,12 @@ const controller =require('../controllers/message');
 const upload =require('../utils/upload');
 router 
     .route('/courseId/:courseId/topicId/:topicId')
-    .post(auth.verifyToken,auth.verifyCourseMember,controller.addMessage)
+    .post(auth.verifyToken,auth.verifyCourseMember,upload.uploadMessage.any(),controller.addMessage)
     .get(auth.verifyToken,auth.verifyCourseMember,controller.getMessages);
 
 router
     .route('/courseId/:courseId/topicId/:topicId/messageId/:messageId')
-    .post(auth.verifyToken,auth.verifyCourseMember,controller.addUesrMessage)
+    .post(auth.verifyToken,auth.verifyCourseMember,upload.uploadMessage.any(),controller.addUesrMessage)
     .get(auth.verifyToken,auth.verifyCourseMember,controller.getMessage)
     .delete(auth.verifyToken,auth.verifyCourseMember,controller.delMessage)
     .put(auth.verifyToken,auth.verifyCourseMember,controller.alertMessage);

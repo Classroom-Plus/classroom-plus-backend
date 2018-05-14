@@ -12,7 +12,7 @@ const searchfile = async (courseId, keyword) => {
             if(sample[j]!=0){
             tmp[`${j}`]=sample[j];
             }
-        if(j<sample.length){
+        if(j>=sample.length){
             result[`${sample[0]}`]=tmp;
         }
     }

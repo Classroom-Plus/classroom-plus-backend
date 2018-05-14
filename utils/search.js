@@ -4,7 +4,7 @@ const readline = require('readline');
 const searchfile = async (courseId, keyword) => {
     const dir = path.join(__dirname, '../public/course/', courseId, 'txt');
     const files = await fs.readdirSync(dir);
-    let result={};
+    let result= new Array();
     for(let i=0;i<files.length;i++){
         let sample =await readfile(path.join(dir,files[i]),files[i],keyword);
         let j,tmp={};
@@ -14,7 +14,8 @@ const searchfile = async (courseId, keyword) => {
             }
         if(j>=sample.length){
             let filename = path.basename(sample[0],path.extname(sample[0]));
-            result[`${filename}`]=tmp;
+            tmp[0]=filename;
+            result.push(tmp);
         }
     }
         return result;

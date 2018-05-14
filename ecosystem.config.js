@@ -29,7 +29,7 @@ module.exports = {
       ref: 'origin/master',
       repo: 'git@github.com:Classroom-Plus/classroom-plus-backend.git',
       path: '/home/leon1757tw/www/production',
-      'post-deploy': 'npm install && pm2 reload ecosystem.config.js --env production'
+      'post-deploy': 'npm install && pm2 start ecosystem.config.js --env production -i 4'
     },
   }
 };

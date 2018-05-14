@@ -7,16 +7,17 @@ const searchfile = async (courseId, keyword) => {
     let result= new Array();
     for(let i=0;i<files.length;i++){
         let sample =await readfile(path.join(dir,files[i]),files[i],keyword);
-        let j,tmp={};
+        let j,tmp={},max=0,index=0;
         for( j=1;j<sample.length;j++)
-            if(sample[j]!=0){
-            tmp[`${j}`]=sample[j];
+            if(max<sample[j]){
+                max=sample[j];
+                index=j;
             }
-        if(j>=sample.length){
-            let filename = path.basename(sample[0],path.extname(sample[0]));
-            tmp[0]=filename;
+        if(max>0){
+            tmp[`${index}`]=max;
             result.push(tmp);
         }
+       
     }
         return result;
 }

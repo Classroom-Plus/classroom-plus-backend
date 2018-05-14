@@ -13,7 +13,8 @@ const searchfile = async (courseId, keyword) => {
             tmp[`${j}`]=sample[j];
             }
         if(j>=sample.length){
-            result[`${sample[0]}`]=tmp;
+            let filename = path.basename(sample[0],path.extname(sample[0]));
+            result[`${filename}`]=tmp;
         }
     }
         return result;

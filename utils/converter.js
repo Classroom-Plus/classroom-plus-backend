@@ -7,7 +7,6 @@ const TOPDF = (file) => {
         file.pdf = path.join(file.dir, file.basename) + ".pdf";
         toPdf(wordBuffer).then(
             (pdfBuffer) => {
-                console.log(pdfBuffer)
                 fs.writeFileSync(file.pdf, pdfBuffer);
                 console.log("Convert PDF is finishing.")
                 resolve(file)

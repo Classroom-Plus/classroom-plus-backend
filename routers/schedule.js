@@ -1,11 +1,12 @@
 const router = require('express').Router();
+const schedule = require('../controllers/schedule');
 const { verifyToken } = require('../middlewares/authenticate');
 
 router
-    .route('/:scheduleId')
-    .get(verifyToken, )
-    .post(verifyToken, )
-    .put(verifyToken, )
-    .delete(verifyToken, );
+    .route('/')
+    .get(verifyToken, schedule.getSchedule)
+    .post(verifyToken, schedule.createSchedule)
+    .put(verifyToken, schedule.updateSchedule)
+    .delete(verifyToken, schedule.deleteSchedule);
 
 module.exports = router;

@@ -260,27 +260,8 @@ const getTopics = async (req, res) => {
             errors: { msg: 'incorrect parameters' }
         });
     try {
-        topics = await db.Topic.findAll({
-            attributes: [
-                'id',
-                'course_id',
-                'created_user_id',
-                'topic_type',
-                'topic_title',
-                'topic_content',
-                'created_at'
-            ]
-        }, { where: { course_id: courseId, deleted_at: null } });
-        event = await db.CourseEvent.findAll({
-            attributes: [
-                'id',
-                'course_id',
-                'event_date',
-                'event_title',
-                'event_info',
-                'created_at'
-            ]
-        }, { where: { course_id: courseId, deleted_at: null } });
+        topics = await db.Topic.findAll( { where: { course_id: courseId, deleted_at: null } });
+        event = await db.CourseEvent.findAll({ where: { course_id: courseId, deleted_at: null } });
         if (event.length > 0)
             event.map((element) => {
                 if ('files' in element.event_info)

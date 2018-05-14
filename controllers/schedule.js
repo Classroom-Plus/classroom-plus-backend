@@ -37,6 +37,7 @@ const getSchedule = async (req, res) => {
 
         scheduleList = await db.UserSchedule.findAll({
             attributes: [
+                'id',
                 'event_date',
                 'event_title',
                 'event_info'
@@ -86,6 +87,11 @@ const createSchedule = async (req, res) => {
             });
         }
 
+        return res.json({
+            status: false,
+            errors: { msg: `errors` }
+        })
+
     } catch (error) {
         return res.json({
             status: false,
@@ -95,10 +101,47 @@ const createSchedule = async (req, res) => {
 }
 
 const updateSchedule = async (req, res) => {
+    let { eventDate, eventTitle, eventInfo } = req.body;
     let userId = req.authData.id;
+    let scheduleId = req.params.scheduleId;
+    let schedule;
 
-    
+    if (!eventDate && !eventTitle && !eventInfo) {
+        return res.json({
+            status: false,
+            errors: { msg: 'incorrect parameters, required at least a parameter' }
+        });
+    }
 
+    let updateData = Object.assign({},
+        (eventDate) ? { event_date: eventDate } : {},
+        (eventTitle) ? { event_title: eventTitle } : {},
+        (eventInfo) ? { event_info: eventInfo } : {}
+    );
+
+    try {
+        schedule = db.UserSchedule.update(
+            updateData,
+            { where: { id: scheduleId } }
+        )
+
+        if (schedule[0]) {
+            return res.json({
+                status: true
+            });
+        }
+
+        return res.json({
+            status: false,
+            errors: { msg: 'updated failed' }
+        });
+
+    } catch (error) {
+        return res.json({
+            status: false,
+            errors: { msg: `database error` }
+        });
+    }
 }
 
 const deleteSchedule = async (req, res) => {

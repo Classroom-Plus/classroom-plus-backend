@@ -5,7 +5,10 @@ const { verifyToken } = require('../middlewares/authenticate');
 router
     .route('/')
     .get(verifyToken, schedule.getSchedule)
-    .post(verifyToken, schedule.createSchedule)
+    .post(verifyToken, schedule.createSchedule);
+    
+router
+    .route('/scheduleId')
     .put(verifyToken, schedule.updateSchedule)
     .delete(verifyToken, schedule.deleteSchedule);
 

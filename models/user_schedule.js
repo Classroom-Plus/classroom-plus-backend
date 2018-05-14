@@ -7,8 +7,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         user_id: {
             type: DataTypes.INTEGER.UNSIGNED.ZEROFILL,
-            allowNull: false,
-            unique: true
+            allowNull: false
         },
         event_date: {
             type: DataTypes.DATEONLY,

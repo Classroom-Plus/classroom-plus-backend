@@ -1,8 +1,9 @@
 const db = require('../models');
 
 const getSchedule = async (req, res) => {
-    let userId = /*req.authData.id*/8;
+    let userId = req.authData.id;
     let courseList, courseAllEventList, courseEventList;
+    let scheduleList, userScheduleList;
     let hasCourse;
 
     try {
@@ -34,9 +35,21 @@ const getSchedule = async (req, res) => {
             return hasCourse;
         });
 
+        scheduleList = await db.UserSchedule.findAll({
+            attributes: [
+                'event_date',
+                'event_title',
+                'event_info'
+            ],
+            where: { user_id: userId },
+            raw: true
+        });
+
+        userScheduleList = courseEventList.concat(scheduleList);
+
         return res.json({
             status: true,
-            data: courseEventList
+            data: userScheduleList
         });
 
     } catch (error) {
@@ -49,11 +62,42 @@ const getSchedule = async (req, res) => {
 
 const createSchedule = async (req, res) => {
     let userId = req.authData.id;
+    let { eventDate, eventTitle, eventInfo } = req.body;
+    let schedule;
 
+    if (!eventDate || !eventTitle) {
+        return res.json({
+            status: false,
+            errors: { msg: 'incorrect parameters' }
+        });
+    }
+
+    try {
+        schedule = await db.UserSchedule.create({
+            user_id: userId,
+            event_date: eventDate,
+            event_title: eventTitle,
+            event_info: eventInfo
+        });
+
+        if (schedule) {
+            return res.json({
+                status: true
+            });
+        }
+
+    } catch (error) {
+        return res.json({
+            status: false,
+            errors: { msg: `database error` }
+        });
+    }
 }
 
 const updateSchedule = async (req, res) => {
     let userId = req.authData.id;
+
+    
 
 }
 

@@ -9,6 +9,8 @@ module.exports = {
     {
       name: 'classroom-plus-backend',
       script: 'index.js',
+      instances : "max",
+      exec_mode : "cluster",
       env: {
         COMMON_VARIABLE: 'true'
       },

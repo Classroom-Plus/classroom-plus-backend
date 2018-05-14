@@ -16,6 +16,7 @@ const materailUpload = async (req, res) => {
     file.path = req.files[0].path;
     file.extname = path.extname(req.files[0].filename);
     file.basename = path.basename(req.files[0].filename, file.extname);
+    console.log(file);
     await convert(file);
     try {
         course = await db.CourseMember.findOne({ where: { course_id: courseId, course_member_id: userId } });
@@ -23,7 +24,7 @@ const materailUpload = async (req, res) => {
             if (course.get('course_member_identity') === 1) {
                 if (await db.CourseMaterial.create({
                     course_id: courseId,
-                    material_directory:  `/public/course/${courseId}/`,
+                    material_directory:  `/course/${courseId}/`,
                     material_filename: req.files[0].filename ,
                     material_convert: file.txt
                 })) return res.json({
@@ -119,8 +120,7 @@ const getFile = async (req, res) => {
        let files=  await db.CourseMaterial.findAll({ where: { course_id: courseId, id: fileId, deleted_at: null } });
        if(files){
            files.map((element)=>{
-               element.download ="";
-               element.download=`${process.env.BACKEND_SERVER_URL}${element.material_directory}${element.material_filename}`;
+               element.material_directory=`${process.env.BACKEND_SERVER_URL}${element.material_directory}${element.material_filename}`;
            })
            res.json (files);
        }

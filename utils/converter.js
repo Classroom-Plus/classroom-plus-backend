@@ -7,10 +7,12 @@ const TOPDF = (file) => {
         file.pdf = path.join(file.dir, file.basename) + ".pdf";
         toPdf(wordBuffer).then(
             (pdfBuffer) => {
+                console.log(pdfBuffer)
                 fs.writeFileSync(file.pdf, pdfBuffer);
                 console.log("Convert PDF is finishing.")
                 resolve(file)
             }, (err) => {
+                console.log(err);
                 throw err;
             }
         );
@@ -23,7 +25,7 @@ const TOTXT = (file) => {
             pdfparser = new PDFParser(this, 1);
         pdfparser.on("pdfParser_dataError", errData => { throw errData; });
         pdfparser.on("pdfParser_dataReady", pdfData => {
-            file.txt = path.join(file.dir, '/txt/', file.basename) + '.txt';
+            file.txt = path.join(file.dir, 'txt', file.basename) + '.txt';
             fs.writeFileSync(file.txt, pdfparser.getRawTextContent());
             resolve(file);
         })

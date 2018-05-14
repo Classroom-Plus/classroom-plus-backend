@@ -14,6 +14,7 @@ const searchfile = async (courseId, keyword) => {
                 index=j;
             }
         if(max>0){
+            tmp['filename']=sample[0];
             tmp[`${index}`]=max;
             result.push(tmp);
         }

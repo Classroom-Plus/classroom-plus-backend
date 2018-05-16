@@ -45,7 +45,7 @@ const converter = async (file) => {
     }
     else if (file.extname === '.ppt' || file.extname === '.pptx' || file.extname === '.doc' || file.extname === '.docx' || file.extname === '.xls') {
         console.log("Convert to PDF");
-        await TOPDF(file).then(file => TOTXT(file)).then(file => delfile(file)).catch(err => console.log(err));
+        await TOPDF(file).then(file => TOTXT(file)).catch(err => console.log(err));
     } else
         file.txt = null;
     return file;

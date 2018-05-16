@@ -146,6 +146,25 @@ const updateSchedule = async (req, res) => {
 
 const deleteSchedule = async (req, res) => {
     let userId = req.authData.id;
+    let scheduleId = req.params.scheduleId;
+
+    try {
+        if (await db.UserSchedule.destroy({ where: { id: scheduleId } })) {
+            return res.json({
+                status: true
+            });
+        }
+
+        return res.json({
+            status: false,
+            errors: { msg: `delete failed` }
+        })
+    } catch (error) {
+        return res.json({
+            status: false,
+            errors: { msg: `database error` }
+        });
+    }
 }
 
 module.exports = {
